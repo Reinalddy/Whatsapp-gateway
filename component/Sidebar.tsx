@@ -3,8 +3,10 @@ import { useState } from "react";
 import {
     Home,
     MessageSquare,
+    MailWarning,
+    MailQuestion,
+    MailOpenIcon,
     Settings,
-    Users,
     HelpCircle,
     ChevronRight,
     Menu,
@@ -13,8 +15,10 @@ import {
 // Sidebar navigation items
 const navigationItems = [
     { name: 'Dashboard', icon: Home, active: true },
-    { name: 'Messages', icon: MessageSquare, active: false },
-    { name: 'Users', icon: Users, active: false },
+    { name: 'Send Messages', icon: MailOpenIcon, active: false },
+    { name: 'Failed Messages', icon: MailWarning, active: false },
+    { name: 'Pending Messages', icon: MailQuestion, active: false },
+    { name: 'All Messages', icon: MessageSquare, active: false },
     { name: 'Settings', icon: Settings, active: false },
     { name: 'Help', icon: HelpCircle, active: false },
 ];
@@ -53,7 +57,7 @@ export default function Sidebar() {
             >
                 {/* Logo */}
                 <div className="flex items-center justify-center h-16 px-6 border-b">
-                    <h1 className="text-xl font-bold text-blue-600">Message System</h1>
+                    <h1 className="text-xl font-bold text-blue-600">Whatsapp Gateway</h1>
                 </div>
 
                 {/* Navigation */}
