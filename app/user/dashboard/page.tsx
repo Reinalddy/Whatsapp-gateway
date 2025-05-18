@@ -7,7 +7,6 @@ import {
     AlertCircle,
     BarChart2,
 } from "lucide-react";
-import Sidebar from "@/component/Sidebar";
 
 // Mock data
 const initialData = {
@@ -66,103 +65,100 @@ export default function MessageDashboard() {
     }
 
     return (
-        <div className="flex h-screen bg-gray-100">
-            <Sidebar />
+        <div className="flex-1 h-screen overflow-auto">
             {/* Main Content */}
-            <div className="flex-1 overflow-auto">
-                <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">Message Dashboard</h1>
-                        <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-600">Last updated:</span>
-                            <span className="text-sm font-medium">{new Date().toLocaleTimeString()}</span>
-                        </div>
+            <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800">Message Dashboard</h1>
+                    <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">Last updated:</span>
+                        <span className="text-sm font-medium">{new Date().toLocaleTimeString()}</span>
                     </div>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {/* Total Messages */}
-                        <div className="bg-white p-4 rounded-md shadow">
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-600 text-sm">Total Messages</span>
-                                <Activity className="h-5 w-5 text-blue-500" />
-                            </div>
-                            <div className="mt-2">
-                                <span className="text-3xl font-bold text-gray-800">{data.total}</span>
-                            </div>
-                        </div>
-
-                        {/* Sent Messages */}
-                        <div className="bg-white p-4 rounded-md shadow">
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-600 text-sm">Sent</span>
-                                <Send className="h-5 w-5 text-green-500" />
-                            </div>
-                            <div className="mt-2">
-                                <span className="text-3xl font-bold text-gray-800">{data.sent}</span>
-                            </div>
-                        </div>
-
-                        {/* Pending Messages */}
-                        <div className="bg-white p-4 rounded-md shadow">
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-600 text-sm">Pending</span>
-                                <Clock className="h-5 w-5 text-amber-500" />
-                            </div>
-                            <div className="mt-2">
-                                <span className="text-3xl font-bold text-gray-800">{data.pending}</span>
-                            </div>
-                        </div>
-
-                        {/* Failed Messages */}
-                        <div className="bg-white p-4 rounded-md shadow">
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-600 text-sm">Failed</span>
-                                <AlertCircle className="h-5 w-5 text-red-500" />
-                            </div>
-                            <div className="mt-2">
-                                <span className="text-3xl font-bold text-gray-800">{data.failed}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Daily Limit */}
-                    <div className="bg-white p-4 rounded-md shadow mb-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-gray-600">Daily Limit</span>
-                            <span className="text-sm font-medium">
-                                {data.sentToday} / {data.dailyLimit} ({limitPercentage.toFixed(1)}%)
-                            </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                            <div
-                                className={`h-2.5 rounded-full ${limitColorClass}`}
-                                style={{ width: `${Math.min(limitPercentage, 100)}%` }}
-                            ></div>
-                        </div>
-                    </div>
-
-                    {/* Message Status Chart */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    {/* Total Messages */}
                     <div className="bg-white p-4 rounded-md shadow">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-medium text-gray-800">Message Status</h2>
-                            <BarChart2 className="h-5 w-5 text-blue-500" />
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-600 text-sm">Total Messages</span>
+                            <Activity className="h-5 w-5 text-blue-500" />
                         </div>
-                        <div className="flex h-40 items-end justify-around">
-                            <div className="flex flex-col items-center">
-                                <div className="bg-green-500 w-16 rounded-t-md" style={{ height: `${(data.sent / data.total) * 100}%` }}></div>
-                                <span className="mt-2 text-sm text-gray-600">Sent</span>
-                                <span className="text-xs font-medium">{((data.sent / data.total) * 100).toFixed(1)}%</span>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <div className="bg-amber-500 w-16 rounded-t-md" style={{ height: `${(data.pending / data.total) * 100}%` }}></div>
-                                <span className="mt-2 text-sm text-gray-600">Pending</span>
-                                <span className="text-xs font-medium">{((data.pending / data.total) * 100).toFixed(1)}%</span>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <div className="bg-red-500 w-16 rounded-t-md" style={{ height: `${(data.failed / data.total) * 100}%` }}></div>
-                                <span className="mt-2 text-sm text-gray-600">Failed</span>
-                                <span className="text-xs font-medium">{((data.failed / data.total) * 100).toFixed(1)}%</span>
-                            </div>
+                        <div className="mt-2">
+                            <span className="text-3xl font-bold text-gray-800">{data.total}</span>
+                        </div>
+                    </div>
+
+                    {/* Sent Messages */}
+                    <div className="bg-white p-4 rounded-md shadow">
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-600 text-sm">Sent</span>
+                            <Send className="h-5 w-5 text-green-500" />
+                        </div>
+                        <div className="mt-2">
+                            <span className="text-3xl font-bold text-gray-800">{data.sent}</span>
+                        </div>
+                    </div>
+
+                    {/* Pending Messages */}
+                    <div className="bg-white p-4 rounded-md shadow">
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-600 text-sm">Pending</span>
+                            <Clock className="h-5 w-5 text-amber-500" />
+                        </div>
+                        <div className="mt-2">
+                            <span className="text-3xl font-bold text-gray-800">{data.pending}</span>
+                        </div>
+                    </div>
+
+                    {/* Failed Messages */}
+                    <div className="bg-white p-4 rounded-md shadow">
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-600 text-sm">Failed</span>
+                            <AlertCircle className="h-5 w-5 text-red-500" />
+                        </div>
+                        <div className="mt-2">
+                            <span className="text-3xl font-bold text-gray-800">{data.failed}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Daily Limit */}
+                <div className="bg-white p-4 rounded-md shadow mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-gray-600">Daily Limit</span>
+                        <span className="text-sm font-medium">
+                            {data.sentToday} / {data.dailyLimit} ({limitPercentage.toFixed(1)}%)
+                        </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                        <div
+                            className={`h-2.5 rounded-full ${limitColorClass}`}
+                            style={{ width: `${Math.min(limitPercentage, 100)}%` }}
+                        ></div>
+                    </div>
+                </div>
+
+                {/* Message Status Chart */}
+                <div className="bg-white p-4 rounded-md shadow">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-medium text-gray-800">Message Status</h2>
+                        <BarChart2 className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div className="flex h-40 items-end justify-around">
+                        <div className="flex flex-col items-center">
+                            <div className="bg-green-500 w-16 rounded-t-md" style={{ height: `${(data.sent / data.total) * 100}%` }}></div>
+                            <span className="mt-2 text-sm text-gray-600">Sent</span>
+                            <span className="text-xs font-medium">{((data.sent / data.total) * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="bg-amber-500 w-16 rounded-t-md" style={{ height: `${(data.pending / data.total) * 100}%` }}></div>
+                            <span className="mt-2 text-sm text-gray-600">Pending</span>
+                            <span className="text-xs font-medium">{((data.pending / data.total) * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="bg-red-500 w-16 rounded-t-md" style={{ height: `${(data.failed / data.total) * 100}%` }}></div>
+                            <span className="mt-2 text-sm text-gray-600">Failed</span>
+                            <span className="text-xs font-medium">{((data.failed / data.total) * 100).toFixed(1)}%</span>
                         </div>
                     </div>
                 </div>
