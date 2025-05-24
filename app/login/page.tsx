@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 type FormField = 'name' | 'email' | 'phoneNumber' | 'password' | 'confirmPassword';
@@ -189,9 +190,9 @@ export default function RegisterForm() {
                     {/* Login Link */}
                     <p className="text-center text-sm text-gray-600">
                         Not Have Account?{' '}
-                        <a href="#" className="text-blue-600 hover:underline">
+                        <Link href="/register" className="text-blue-600 hover:underline">
                             Register
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </div>

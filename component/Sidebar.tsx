@@ -25,7 +25,7 @@ export default function Sidebar() {
         { name: 'Failed Messages', icon: MailWarning, active: pathName == "/user/failed-messages" ? true : false, url: "/user/failed-messages" },
         { name: 'Pending Messages', icon: MailQuestion, active: pathName == "/user/pending-messages" ? true : false, url: "/user/pending-messages" },
         { name: 'All Messages', icon: MessageSquare, active: pathName == "/user/all-messages" ? true : false, url: "/user/all-messages" },
-        { name: 'Settings', icon: Settings, active: pathName == "/user/settings" ? true : false, url: "/user/settings" },
+        { name: 'Settings', icon: Settings, active: pathName == "/user/settings/whatsapp" ? true : false, url: "/user/settings/whatsapp" },
     ];
 
     return (

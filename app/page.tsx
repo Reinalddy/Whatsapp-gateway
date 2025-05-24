@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Send, MessageSquare, Lock, Zap, BarChart2, Globe, CheckCircle, Menu, X } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,9 +38,9 @@ export default function Home() {
               <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900">Pricing</a>
               <a href="#faq" className="text-gray-600 hover:text-gray-900">FAQ</a>
-              <a href="#contact" className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+              <Link href="/register" className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
                 Get Started
-              </a>
+              </Link>
             </div>
 
             {/* Mobile menu button */}
