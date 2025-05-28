@@ -117,6 +117,11 @@ export default function SendMessagesPage() {
                 </div>
             </div>
 
+            {/* BUTTON TO OPEN MODAL */}
+            <div className='mb-4'>
+                
+            </div>
+
             {/* Items per page selector */}
             <div className="flex justify-between items-center mb-4">
                 <div className="text-sm text-gray-600">
