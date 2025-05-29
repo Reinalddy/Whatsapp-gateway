@@ -24,10 +24,10 @@ model user {
 }
 
 model whatsAppDevice {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String
   phoneNumber String
-  sessionData Json
+  sessionData Json?
   isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

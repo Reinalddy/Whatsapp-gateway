@@ -41,17 +41,23 @@ export async function GET(req: NextRequest) {
 
             sock.ev.on("creds.update", saveCreds);
 
-            const connectionListener = (update: Partial<ConnectionState>) => {
+            const connectionListener = async (update: Partial<ConnectionState>) => {
                 try {
                     if (update.qr) {
+                        console.error("QR code received for device:", deviceId);
                         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ qr: update.qr })}\n\n`));
                     }
 
                     if (update.connection === "open") {
                         // UPDATE DEVICE AS ACTIVE
-                        prisma.whatsAppDevice.update({
-                            where: { id: deviceId },
-                            data: { isActive: true, sessionData: JSON.stringify(state) },
+                        // console.error("Device is active:", deviceId);
+                        console.log(device);
+                        await prisma.whatsAppDevice.update({
+                            where: { id: device.id },
+                            data: { 
+                                isActive: true, 
+                                sessionData: JSON.stringify(state) 
+                            },
                         });
 
                         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ connected: true })}\n\n`));
@@ -60,8 +66,9 @@ export async function GET(req: NextRequest) {
                     }
 
                     if (update.connection === "close") {
+                        console.error("Device connection closed:", deviceId);
                         // UPDATE DEVICE AS INACTIVE
-                        prisma.whatsAppDevice.update({
+                        await prisma.whatsAppDevice.update({
                             where: { id: deviceId },
                             data: { isActive: true, sessionData: JSON.stringify(state) },
                         });

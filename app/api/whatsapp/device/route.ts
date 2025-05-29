@@ -9,10 +9,13 @@ export async function POST(req: Request) {
     
         const newDevice = await prisma.whatsAppDevice.create({
             data: {
+                // id: crypto.randomUUID(),
                 name: deviceName,
-                sessionData: "",
+                // sessionData: "{}",
                 phoneNumber: deviceNumber,
                 isActive: false,
+                // createdAt: new Date(),
+                // updatedAt: new Date(),
             }
         });
     

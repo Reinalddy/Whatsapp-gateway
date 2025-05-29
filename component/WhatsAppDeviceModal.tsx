@@ -13,6 +13,7 @@ export default function WhatsAppDeviceModal({ open, onClose }: Props) {
     const [deviceNumber, setDeviceNumber] = useState("");
     const [qr, setQr] = useState("");
     const [connected, setConnected] = useState(false);
+    const [deviceId, setDeviceId] = useState("");
 
     const handleAddDevice = async () => {
         const res = await fetchApi("/api/whatsapp/device", {
@@ -23,9 +24,10 @@ export default function WhatsAppDeviceModal({ open, onClose }: Props) {
             },
         });
         const data = res;
-        console.log(data);
+        // console.log(data);
         // console.log(deviceId);
-        console.log(data.data.id);
+        // console.log(data.data.id);
+        setDeviceId(data.data.id);
         startQrStream(data.data.id);
     };
 
