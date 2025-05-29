@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { fetchApi } from "@/helpers/fetchApi";
+import { toast } from "react-hot-toast";
 
 interface Props {
     open: boolean;
@@ -14,8 +15,10 @@ export default function WhatsAppDeviceModal({ open, onClose }: Props) {
     const [qr, setQr] = useState("");
     const [connected, setConnected] = useState(false);
     const [deviceId, setDeviceId] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleAddDevice = async () => {
+        setLoading(true);
         const res = await fetchApi("/api/whatsapp/device", {
             method: "POST",
             data: JSON.stringify({ deviceName, deviceNumber }),
@@ -23,27 +26,16 @@ export default function WhatsAppDeviceModal({ open, onClose }: Props) {
                 "Content-Type": "application/json",
             },
         });
+        setLoading(false);
         const data = res;
         // console.log(data);
         // console.log(deviceId);
         // console.log(data.data.id);
-        setDeviceId(data.data.id);
-        startQrStream(data.data.id);
-    };
-
-    const startQrStream = (id: string) => {
-        const evtSource = new EventSource(`/api/whatsapp/qr-stream?deviceId=${id}`);
-        evtSource.onmessage = (e) => {
-            const data = JSON.parse(e.data);
-            if (data.qr) setQr(data.qr);
-            if (data.connected) {
-                setConnected(true);
-                evtSource.close();
-                setTimeout(() => {
-                    onClose();
-                }, 1500);
-            }
-        };
+        if(data.code == 200) {
+            toast.success("Device created successfully");
+            setDeviceId(data.data.id);
+        }
+        onClose();
     };
 
     useEffect(() => {
@@ -76,9 +68,17 @@ export default function WhatsAppDeviceModal({ open, onClose }: Props) {
                         />
                         <button
                             onClick={handleAddDevice}
-                            className="bg-green-600 text-white px-4 py-2 rounded w-full"
+                            className="px-4 py-2 mr-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                            disabled={loading}
                         >
-                            Generate QR
+                            {loading ? (
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <span>Loading...</span>
+                                </div>
+                            ) : (
+                                "Add Device"
+                            )}
                         </button>
                     </>
                 ) : (

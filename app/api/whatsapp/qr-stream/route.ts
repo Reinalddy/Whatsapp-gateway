@@ -66,12 +66,14 @@ export async function GET(req: NextRequest) {
                     }
 
                     if (update.connection === "close") {
-                        console.error("Device connection closed:", deviceId);
                         // UPDATE DEVICE AS INACTIVE
                         await prisma.whatsAppDevice.update({
                             where: { id: deviceId },
-                            data: { isActive: true, sessionData: JSON.stringify(state) },
+                            data: { isActive: false, sessionData: JSON.stringify(state) },
                         });
+
+                        // USER MUST RE-SCAN QR CODE
+                        console.log("Device connection closed, user must re-scan QR code:", deviceId);
                         
                         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ connected: false })}\n\n`));
                         controller.close();

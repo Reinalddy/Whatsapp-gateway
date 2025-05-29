@@ -17,8 +17,12 @@ interface Meta {
     totalPages: number;
 }
 
+interface Props {
+    registerFunction: (fn: () => void) => void;
+  }
 
-export default function WhatsAppDevicesTable() {
+
+export default function WhatsAppDevicesTable({ registerFunction }: Props) {
     const [devices, setDevices] = useState<WhatsAppDevice[]>([]);
     const [meta, setMeta] = useState<Meta | null>(null);
     const [search, setSearch] = useState("");
@@ -48,7 +52,8 @@ export default function WhatsAppDevicesTable() {
 
     useEffect(() => {
         fetchDevices();
-    }, [page, search]);
+        registerFunction(fetchDevices); // Register the function to refresh the table
+    }, [page, search, modalScanOpen]);
 
     return (
         <div className="p-6">
@@ -139,7 +144,8 @@ export default function WhatsAppDevicesTable() {
             <WhatsAppScanQrModal
                 open={modalScanOpen}
                 onClose={() => setModalScanOpen(false)}
-                deviceId={deviceId} // You can pass the device ID here if needed
+                deviceId={deviceId} 
+                refreshTable={() => fetchDevices()}
             />
 
 

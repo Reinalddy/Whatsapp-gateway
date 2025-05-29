@@ -1,34 +1,127 @@
-// app/api/whatsapp/send-message/route.ts
+/* eslint-disable react-hooks/rules-of-hooks */
+export const runtime = 'nodejs';
+import { makeWASocket, useMultiFileAuthState } from "baileys";
+import * as fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
-import { getWhatsAppInstance } from "../../../../lib/whatsapp/whatsapp";
+import { prisma } from "@/helpers/prismaCall";
+
+/**
+ * Kirim pesan WhatsApp ke nomor tujuan menggunakan Baileys
+ * @param deviceId ID device yang sudah login
+ * @param phoneNumber Nomor tujuan (dalam format internasional, contoh: 6281234567890)
+ * @param message Isi pesan yang ingin dikirim
+    */
 
 export async function POST(req: NextRequest) {
-    const { to, message, deviceId } = await req.json();
-
-    if (!to || !message || !deviceId) {
-        return NextResponse.json({ 
-            code: 400,
-            message: "all field is required",
-            data: { to, message, deviceId }
-        }
-        );
-    }
-
+    const { deviceId, phoneNumber, message } = await req.json();
     try {
-        const sock = await getWhatsAppInstance(deviceId);
-        await sock.sendMessage(`${to}@s.whatsapp.net`, { text: message });
-
-        return NextResponse.json({
-            code: 200,
-            message: "Message sent successfully",
-            data: { to, message, deviceId }
+        // CARI DEVICE DI DATABASE
+        const device = await prisma.whatsAppDevice.findUnique({
+            where: {
+                id: deviceId,
+            },
+            select: {
+                id: true,
+                name: true,
+                phoneNumber: true,
+                sessionData: true,
+                isActive: true,
+            },
         });
+
+        if (!device) {
+            return NextResponse.json({
+                code: 404,
+                message: "Device not found",
+            }, { status: 404 });
+        }
+
+        if (!device.isActive) {
+            return NextResponse.json({
+                code: 400,
+                message: "Device is not active. Please scan the QR code first.",
+            }, { status: 400 });
+        }
+        
+        const authDir = `auth/${deviceId}`;
+
+        // Pastikan direktori autentikasi masih ada
+        if (!fs.existsSync(authDir)) {
+            throw new Error("Session not found. Please login again.");
+        }
+
+        // Ambil state dan fungsi penyimpanan session
+        const { state, saveCreds } = await useMultiFileAuthState(authDir);
+        const sock = makeWASocket({ auth: state });
+        // Simpan session jika ada perubahan
+        sock.ev.on("creds.update", saveCreds);
+
+        // Tunggu koneksi terbuka dulu
+        let isConnected = false;
+        // Gunakan Promise untuk menunggu koneksi
+        await new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                if (!isConnected) reject(new Error("Connection timeout"));
+            }, 10000); // timeout 10 detik
+
+            sock.ev.on("connection.update", (update) => {
+                if (update.connection === "open") {
+                    isConnected = true;
+                    clearTimeout(timeout);
+                    resolve();
+                }
+
+                if (update.connection === "close") {
+                    clearTimeout(timeout);
+                    reject(new Error("Connection closed"));
+                }
+            });
+        })
+        
+        // Format nomor tujuan ke format JID
+        const jid = phoneNumber.includes("@s.whatsapp.net") ? phoneNumber : `${phoneNumber}@s.whatsapp.net`;
+        
+        if (sock?.user) {
+            // Kirim pesan teks
+            try {
+                await sock.sendMessage(jid, { text: message });
+            } catch (error) {
+                return NextResponse.json({
+                    code: 500,
+                    message: "Failed to send message",
+                    error: error
+                }, { status: 500 });
+            }
+
+            return NextResponse.json({
+                code: 200,
+                message: "Message sent successfully",
+                data: {
+                    deviceId: device.id,
+                    phoneNumber: jid,
+                    message: message,
+                }
+            });
+        } else {
+            console.error("❌ WhatsApp device not connected.");
+            return NextResponse.json({
+                code: 400,
+                message: "WhatsApp device not connected",
+                data: {
+                    deviceId: device.id,
+                    phoneNumber: jid,
+                    message: message,
+                }
+            });
+        }
+        
     } catch (error) {
-        console.error("Failed to send message:", error);
+        console.error("Error sending message:", error);
         return NextResponse.json({
             code: 500,
-            message: "Failed to send message",
-            error: error instanceof Error ? error.message : "Unknown error"
+            message: "Error sending message",
+            error
         });
+        
     }
 }

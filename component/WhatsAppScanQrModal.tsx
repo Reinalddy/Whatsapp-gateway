@@ -8,11 +8,17 @@ interface Props {
     open: boolean;
     onClose: () => void;
     deviceId?: string;
+    refreshTable: () => void;
 }
 
-export default function WhatsAppScanQrModal({ open, onClose, deviceId }: Props) {
+export default function WhatsAppScanQrModal({ open, onClose, deviceId, refreshTable }: Props) {
     const [qr, setQr] = useState("");
     const [connected, setConnected] = useState(false);
+
+    const handleModalOnclose = () =>  {
+        refreshTable();
+        onClose();
+    }
 
 
     useEffect(() => {
@@ -27,7 +33,7 @@ export default function WhatsAppScanQrModal({ open, onClose, deviceId }: Props) 
                         setConnected(true);
                         evtSource.close();
                         setTimeout(() => {
-                            onClose();
+                            handleModalOnclose();
                         }, 1500);
                     }
                 };
@@ -47,7 +53,7 @@ export default function WhatsAppScanQrModal({ open, onClose, deviceId }: Props) 
                         Scan WhatsApp QR Code
                     </h2>
                     <button
-                        onClick={onClose}
+                        onClick={handleModalOnclose}
                         className="text-gray-500 hover:text-gray-800 dark:hover:text-white"
                     >
                         <svg
