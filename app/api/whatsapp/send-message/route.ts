@@ -14,6 +14,16 @@ import { prisma } from "@/helpers/prismaCall";
 
 export async function POST(req: NextRequest) {
     const { deviceId, phoneNumber, message } = await req.json();
+
+    // Validasi format nomor HP (hanya angka dan panjang wajar)
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+        return NextResponse.json({
+            code: 400,
+            message: "Invalid phone number format. Must be 10 to 15 digits and numeric only.",
+        }, { status: 400 });
+    }
+
     try {
         // CARI DEVICE DI DATABASE
         const device = await prisma.whatsAppDevice.findUnique({
@@ -56,12 +66,37 @@ export async function POST(req: NextRequest) {
         // Simpan session jika ada perubahan
         sock.ev.on("creds.update", saveCreds);
 
+        // CREATE DATABASE MESSAGE LOG
+        await prisma.whatsAppMessage.create({
+            data: {
+                deviceId: device.id,
+                content: message,
+                sender: device.phoneNumber,
+                recipient: phoneNumber,
+                status: "pending", // Status awal adalah pending
+            },
+        });
+
         // Tunggu koneksi terbuka dulu
         let isConnected = false;
         // Gunakan Promise untuk menunggu koneksi
         await new Promise<void>((resolve, reject) => {
             const timeout = setTimeout(() => {
-                if (!isConnected) reject(new Error("Connection timeout"));
+                if (!isConnected) {
+                    // UPDATE STATUS MESSAGE LOG KE TIMEOUT
+                    prisma.whatsAppMessage.updateMany({
+                        where: {
+                            deviceId: device.id,
+                            recipient: phoneNumber,
+                        },
+                        data: {
+                            status: "failed", // Update status ke timeout
+                            notes: "Connection timeout",
+                        },
+                    });
+
+                    reject(new Error("Connection timeout"))
+                }
             }, 10000); // timeout 10 detik
 
             sock.ev.on("connection.update", (update) => {
@@ -73,6 +108,17 @@ export async function POST(req: NextRequest) {
 
                 if (update.connection === "close") {
                     clearTimeout(timeout);
+                    // UPDATE STATUS MESSAGE LOG KE CONNECTION CLOSED
+                    prisma.whatsAppMessage.updateMany({
+                        where: {
+                            deviceId: device.id,
+                            recipient: phoneNumber,
+                        },
+                        data: {
+                            status: "failed", // Update status ke timeout
+                            notes: "Connection closed",
+                        },
+                    });
                     reject(new Error("Connection closed"));
                 }
             });
@@ -86,12 +132,33 @@ export async function POST(req: NextRequest) {
             try {
                 await sock.sendMessage(jid, { text: message });
             } catch (error) {
+               await prisma.whatsAppMessage.updateMany({
+                    where: {
+                        deviceId: device.id,
+                        recipient: phoneNumber,
+                    },
+                    data: {
+                        status: "failed", // Update status ke timeout
+                        notes: "Failed to send message",
+                    },
+                });
                 return NextResponse.json({
                     code: 500,
                     message: "Failed to send message",
                     error: error
                 }, { status: 500 });
             }
+
+            await prisma.whatsAppMessage.updateMany({
+                where: {
+                    deviceId: device.id,
+                    recipient: phoneNumber,
+                },
+                data: {
+                    status: "success", // Update status ke timeout
+                    notes: "Message sent successfully",
+                },
+            });
 
             return NextResponse.json({
                 code: 200,
@@ -104,6 +171,16 @@ export async function POST(req: NextRequest) {
             });
         } else {
             console.error("❌ WhatsApp device not connected.");
+            await prisma.whatsAppMessage.updateMany({
+                where: {
+                    deviceId: device.id,
+                    recipient: phoneNumber,
+                },
+                data: {
+                    status: "failed", // Update status ke timeout
+                    notes: "WhatsApp device not connected",
+                },
+            });
             return NextResponse.json({
                 code: 400,
                 message: "WhatsApp device not connected",

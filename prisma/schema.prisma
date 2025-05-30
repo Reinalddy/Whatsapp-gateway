@@ -32,3 +32,15 @@ model whatsAppDevice {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model whatsAppMessage {
+  id          String   @id @default(cuid())
+  deviceId    String
+  content     String
+  sender      String
+  recipient   String
+  status      String   @default("pending")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

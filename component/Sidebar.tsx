@@ -5,9 +5,9 @@ import { useState } from "react";
 import {
     Home,
     MessageSquare,
-    MailWarning,
-    MailQuestion,
-    MailOpenIcon,
+    // MailWarning,
+    // MailQuestion,
+    // MailOpenIcon,
     Settings,
     ChevronRight,
     Menu,
@@ -21,10 +21,10 @@ export default function Sidebar() {
 
     const navigationItems = [
         { name: 'Dashboard', icon: Home, active: pathName == "/user/dashboard" ? true : false, url:'/user/dashboard'},
-        { name: 'Send Messages', icon: MailOpenIcon, active: pathName == "/user/send-messages" ? true : false, url:"/user/send-messages" },
-        { name: 'Failed Messages', icon: MailWarning, active: pathName == "/user/failed-messages" ? true : false, url: "/user/failed-messages" },
-        { name: 'Pending Messages', icon: MailQuestion, active: pathName == "/user/pending-messages" ? true : false, url: "/user/pending-messages" },
-        { name: 'All Messages', icon: MessageSquare, active: pathName == "/user/all-messages" ? true : false, url: "/user/all-messages" },
+        // { name: 'Send Messages', icon: MailOpenIcon, active: pathName == "/user/send-messages" ? true : false, url:"/user/send-messages" },
+        // { name: 'Failed Messages', icon: MailWarning, active: pathName == "/user/failed-messages" ? true : false, url: "/user/failed-messages" },
+        // { name: 'Pending Messages', icon: MailQuestion, active: pathName == "/user/pending-messages" ? true : false, url: "/user/pending-messages" },
+        { name: 'Messages', icon: MessageSquare, active: pathName == "/user/all-messages" ? true : false, url: "/user/all-messages" },
         { name: 'Settings', icon: Settings, active: pathName == "/user/settings/whatsapp" ? true : false, url: "/user/settings/whatsapp" },
     ];
 
