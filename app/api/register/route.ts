@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 // import { PrismaClient } from "prisma";
 import { PrismaClient } from "@/app/generated/prisma";
 import bcrypt from 'bcrypt';
-
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
@@ -17,6 +16,23 @@ export async function POST(request: Request) {
         });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return NextResponse.json({
+            code: 400,
+            message: "Invalid email format",
+            data : null
+        });
+    }
+
+    if (password.length < 8) {
+        return NextResponse.json({
+            code: 400,
+            message: "Password must be at least 8 characters",
+            data : null
+        });
+    }
+
     const existingUser = await prisma.user.findUnique({ where: {email} });
 
     if(existingUser) {
@@ -24,6 +40,18 @@ export async function POST(request: Request) {
             code: 400,
             message: "Users alredy Registered",
             data: body
+        });
+    }
+
+    const existingPhone = await prisma.user.findUnique({
+        where: {phoneNumber},
+    });
+
+    if (existingPhone) {
+        return NextResponse.json({
+            code: 400,
+            message: "Phone number already registered",
+            data : null,
         });
     }
 
@@ -35,6 +63,11 @@ export async function POST(request: Request) {
             email,
             phoneNumber,
             password: hashedPassword,
+            role: {
+                connect: {
+                    name: "user"
+                }
+            }
         }
     });
 

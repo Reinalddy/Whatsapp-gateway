@@ -14,16 +14,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
+model User {
   id           Int      @id @default(autoincrement())
   name         String
   email        String   @unique
-  phoneNumber  String
+  phoneNumber  String @unique
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id])
   password     String
   createdAt    DateTime @default(now())
+
+  @@map("users") // 🔁 Nama tabel di database
 }
 
-model whatsAppDevice {
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions RolePermission[]
+  users       User[]
+
+  @@map("roles") // 🔁 Nama tabel di database
+}
+
+model Permission {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  role       RolePermission[]
+
+  @@map("permissions") // 🔁 Nama tabel di database
+}
+
+
+model RolePermission {
+  id           String      @id @default(uuid())
+  roleId       String
+  permissionId String
+  role         Role        @relation(fields: [roleId], references: [id])
+  permission   Permission  @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model WhatsAppDevice {
   id          String   @id @default(cuid())
   name        String
   phoneNumber String
@@ -31,9 +65,10 @@ model whatsAppDevice {
   isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  @@map("whatsapp_device")
 }
 
-model whatsAppMessage {
+model WhatsAppMessage {
   id          String   @id @default(cuid())
   deviceId    String
   content     String
@@ -43,4 +78,6 @@ model whatsAppMessage {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("whatsapp_message")
 }

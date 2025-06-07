@@ -2,11 +2,15 @@
   "name": "whatsapp-gateway",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
@@ -14,7 +18,9 @@
     "axios": "^1.9.0",
     "baileys": "^6.7.16",
     "bcrypt": "^6.0.0",
+    "cookies": "^0.9.1",
     "jimp": "^0.16.13",
+    "jsonwebtoken": "^9.0.2",
     "link-preview-js": "^3.0.15",
     "lucide-react": "^0.510.0",
     "next": "15.3.2",
@@ -33,12 +39,14 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "prisma": "^6.8.2",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
