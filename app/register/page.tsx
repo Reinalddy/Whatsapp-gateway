@@ -1,12 +1,18 @@
 'use client'
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { fetchApi } from '@/helpers/fetchApi';
+import { useRouter } from 'next/navigation';
 
 type FormField = 'name' | 'email' | 'phoneNumber' | 'password' | 'confirmPassword';
 
+type FormData = {
+    [key in FormField]: string;
+};
+
 export default function RegisterForm() {
     // Form state
-    const [formData, setFormData] = useState<Record<FormField, string>>({
+    const [formData, setFormData] = useState<FormData>({
         name: '',
         email: '',
         phoneNumber: '',
@@ -15,13 +21,15 @@ export default function RegisterForm() {
     });
 
     // Error state
-    const [errors, setErrors] = useState<Record<FormField, string>>({
+    const [errors, setErrors] = useState<FormData>({
         name: '',
         email: '',
         phoneNumber: '',
         password: '',
         confirmPassword: '',
     });
+
+    const router = useRouter();
 
     // Success state
     const [isSuccess, setIsSuccess] = useState(false);
@@ -30,31 +38,30 @@ export default function RegisterForm() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
-        // Pastikan name adalah FormField
         const fieldName = name as FormField;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+        setFormData((prev) => ({
+            ...prev,
+            [fieldName]: value,
+        }));
 
-        // Clear errors when typing
         if (errors[fieldName]) {
-            setErrors({
-                ...errors,
-                [name]: '',
-            });
+            setErrors((prev) => ({
+                ...prev,
+                [fieldName]: '',
+            }));
         }
     };
 
     // Validate form
     const validateForm = () => {
-        const tempErrors = {
+        const tempErrors: FormData = {
             name: '',
             email: '',
             phoneNumber: '',
             password: '',
             confirmPassword: '',
         };
+
         let isValid = true;
 
         // Name validation
@@ -74,8 +81,7 @@ export default function RegisterForm() {
         }
 
         // Phone validation
-        // Accept formats like: +1234567890, 123-456-7890, (123) 456-7890, 1234567890
-        const phoneRegex = /^(\+\d{1,3})?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
+        const phoneRegex = /^[1-9]\d{7,14}$/;
         if (!formData.phoneNumber.trim()) {
             tempErrors.phoneNumber = 'Phone number is required';
             isValid = false;
@@ -103,28 +109,28 @@ export default function RegisterForm() {
         return isValid;
     };
 
-    // Handle form submission
     const handleSubmit = () => {
         if (validateForm()) {
-            // Form is valid, perform registration
-            console.log('Registration data:', formData);
+            submitDataToApi(formData);
+        }
+    };
 
-            // Here you would typically send the data to your API
+    const submitDataToApi = async (formData: FormData) => {
+        const res = await fetchApi("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            data: {
+                name: formData.name,
+                email: formData.email,
+                phoneNumber: formData.phoneNumber,
+                password: formData.password
+            },
+        });
+
+        if(res.code == 200) {
             setIsSuccess(true);
-
-            // Reset form
-            setFormData({
-                name: '',
-                email: '',
-                phoneNumber: '',
-                password: '',
-                confirmPassword: '',
-            });
-
-            // Reset success message after 3 seconds
-            setTimeout(() => {
-                setIsSuccess(false);
-            }, 3000);
+            setIsSuccess(false);
+            router.push('/login');
         }
     };
 
@@ -140,108 +146,42 @@ export default function RegisterForm() {
                 )}
 
                 <div className="space-y-4">
-                    {/* Name Field */}
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.name ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'
-                                }`}
-                            placeholder="Enter your full name"
-                        />
-                        {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-                    </div>
+                    {/* Input Fields */}
+                    {(['name', 'email', 'phoneNumber', 'password', 'confirmPassword'] as FormField[]).map((field) => (
+                        <div key={field}>
+                            <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-1">
+                                {field === 'confirmPassword'
+                                    ? 'Confirm Password'
+                                    : field.charAt(0).toUpperCase() + field.slice(1)}
+                            </label>
+                            <input
+                                type={field.includes('password') ? 'password' : field === 'email' ? 'email' : 'text'}
+                                id={field}
+                                name={field}
+                                value={formData[field]}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors[field]
+                                    ? 'border-red-500 focus:ring-red-200'
+                                    : 'border-gray-300 focus:ring-blue-200'
+                                    }`}
+                                placeholder={`Enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                            />
+                            {errors[field] && <p className="mt-1 text-sm text-red-500">{errors[field]}</p>}
+                            {field === 'phoneNumber' && (
+                                <span className="text-xs text-gray-500 mt-1 block">
+                                    Format: 628123456789 (no &quot+&quot or spaces)
+                                </span>
+                            )}
+                        </div>
+                    ))}
 
-                    {/* Email Field */}
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'
-                                }`}
-                            placeholder="Enter your email"
-                        />
-                        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-                    </div>
+                    <button
+                        onClick={handleSubmit}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300"
+                    >
+                        Register
+                    </button>
 
-                    {/* Phone Number Field */}
-                    <div>
-                        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                            Phone Number
-                        </label>
-                        <input
-                            type="tel"
-                            id="phoneNumber"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.phoneNumber ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'
-                                }`}
-                            placeholder="Enter your phone number"
-                        />
-                        {errors.phoneNumber && <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>}
-                        <span className="text-xs text-gray-500 mt-1 block">Format: +1234567890 or 123-456-7890</span>
-                    </div>
-
-                    {/* Password Field */}
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'
-                                }`}
-                            placeholder="Create a password"
-                        />
-                        {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
-                    </div>
-
-                    {/* Confirm Password Field */}
-                    <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                            Confirm Password
-                        </label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.confirmPassword ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'
-                                }`}
-                            placeholder="Confirm your password"
-                        />
-                        {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
-                    </div>
-
-                    {/* Submit Button */}
-                    <div>
-                        <button
-                            onClick={handleSubmit}
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300"
-                        >
-                            Register
-                        </button>
-                    </div>
-
-                    {/* Login Link */}
                     <p className="text-center text-sm text-gray-600">
                         Already have an account?{' '}
                         <Link href="/login" className="text-blue-600 hover:underline">

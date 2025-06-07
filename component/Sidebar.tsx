@@ -11,7 +11,8 @@ import {
     Settings,
     ChevronRight,
     Menu,
-    X
+    X,
+    LogOut,
 } from "lucide-react";
 // Sidebar navigation items
 
@@ -26,6 +27,7 @@ export default function Sidebar() {
         // { name: 'Pending Messages', icon: MailQuestion, active: pathName == "/user/pending-messages" ? true : false, url: "/user/pending-messages" },
         { name: 'Messages', icon: MessageSquare, active: pathName == "/user/all-messages" ? true : false, url: "/user/all-messages" },
         { name: 'Settings', icon: Settings, active: pathName == "/user/settings/whatsapp" ? true : false, url: "/user/settings/whatsapp" },
+        {name: 'Logout', icon: LogOut, active: pathName == "user/logout" ? true : false, url: "/api/logout"}
     ];
 
     return (

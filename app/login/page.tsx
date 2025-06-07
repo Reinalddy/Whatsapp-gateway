@@ -1,10 +1,17 @@
 'use client'
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { fetchApi } from '@/helpers/fetchApi';
+import { useRouter } from 'next/navigation';
 
 type FormField = 'name' | 'email' | 'phoneNumber' | 'password' | 'confirmPassword';
 
+type FormData = {
+    [key in FormField]: string;
+};
+
 export default function RegisterForm() {
+    const router = useRouter();
     // Form state
     const [formData, setFormData] = useState<Record<FormField, string>>({
         name: '',
@@ -57,12 +64,6 @@ export default function RegisterForm() {
         };
         let isValid = true;
 
-        // Name validation
-        if (!formData.name.trim()) {
-            tempErrors.name = 'Name is required';
-            isValid = false;
-        }
-
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!formData.email.trim()) {
@@ -73,29 +74,12 @@ export default function RegisterForm() {
             isValid = false;
         }
 
-        // Phone validation
-        // Accept formats like: +1234567890, 123-456-7890, (123) 456-7890, 1234567890
-        const phoneRegex = /^(\+\d{1,3})?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
-        if (!formData.phoneNumber.trim()) {
-            tempErrors.phoneNumber = 'Phone number is required';
-            isValid = false;
-        } else if (!phoneRegex.test(formData.phoneNumber)) {
-            tempErrors.phoneNumber = 'Invalid phone number format';
-            isValid = false;
-        }
-
         // Password validation
         if (!formData.password) {
             tempErrors.password = 'Password is required';
             isValid = false;
         } else if (formData.password.length < 8) {
             tempErrors.password = 'Password must be at least 8 characters';
-            isValid = false;
-        }
-
-        // Confirm password validation
-        if (formData.password !== formData.confirmPassword) {
-            tempErrors.confirmPassword = 'Passwords do not match';
             isValid = false;
         }
 
@@ -110,23 +94,25 @@ export default function RegisterForm() {
             console.log('Registration data:', formData);
 
             // Here you would typically send the data to your API
-            setIsSuccess(true);
-
-            // Reset form
-            setFormData({
-                name: '',
-                email: '',
-                phoneNumber: '',
-                password: '',
-                confirmPassword: '',
-            });
-
-            // Reset success message after 3 seconds
-            setTimeout(() => {
-                setIsSuccess(false);
-            }, 3000);
+            submitDataToApi(formData);
         }
     };
+
+    const submitDataToApi = async (formData: FormData) => {
+        const res = await fetchApi("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            data: {
+                email: formData.email,
+                password: formData.password
+            },
+        });
+
+        if(res.code == 200) {
+            setIsSuccess(true);
+            router.push('/user/dashboard');
+        }
+    }
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
