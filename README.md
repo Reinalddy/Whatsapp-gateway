@@ -14,10 +14,12 @@ pnpm dev
 bun dev
 ```
 Landing Page
-![image](https://github.com/user-attachments/assets/24a47655-6907-4afd-874d-7bc9decaf8d0)
+![image](https://github.com/user-attachments/assets/ba68292a-8db2-43a8-a208-2065607b5323)
+
 
 User Dashboard
-![image](https://github.com/user-attachments/assets/28da4c69-614e-4ca8-8385-7508f4aecf16)
+![image](https://github.com/user-attachments/assets/4ae5955a-9efd-4e87-b5ad-ddcc175a4f73)
+
 
 
 
