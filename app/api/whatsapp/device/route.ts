@@ -1,9 +1,16 @@
 import { prisma } from "@helpers/prismaCall";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
+        const response = await apiMiddleware(req);
+        const checkAuth = await response.json();
+        if (checkAuth.code != 200) {
+            return checkAuth;
+        }
+
         const body = await req.json();
         const { deviceName, deviceNumber } = body;
     

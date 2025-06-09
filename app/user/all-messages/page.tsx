@@ -24,7 +24,10 @@ export default function AllMessagesPage() {
     const limit = 5;
 
     const fetchMessages = async () => {
-        const res = await fetchApi(`/api/whatsapp/message-list?search=${search}&page=${page}&limit=${limit}&status=${status}`);
+        const res = await fetchApi(`/api/whatsapp/message-list?search=${search}&page=${page}&limit=${limit}&status=${status}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
         const data = res.data[0];
         setMessages(data.messages);
         setTotalPages(data.totalPages);

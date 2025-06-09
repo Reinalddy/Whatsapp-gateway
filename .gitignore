@@ -24,6 +24,7 @@ Thumbs.db
 # Prisma
 prisma/dev.db
 prisma/generated/
+prisma/migrations/
 node_modules/.prisma/
 app/generated/prisma/
 

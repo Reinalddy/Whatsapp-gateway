@@ -4,6 +4,7 @@ import { makeWASocket, useMultiFileAuthState } from "baileys";
 import * as fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/helpers/prismaCall";
+import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 
 /**
  * Kirim pesan WhatsApp ke nomor tujuan menggunakan Baileys
@@ -13,6 +14,13 @@ import { prisma } from "@/helpers/prismaCall";
     */
 
 export async function POST(req: NextRequest) {
+
+    const response = await apiMiddleware(req);
+    const checkAuth = await response.json();
+    if (checkAuth.code != 200) {
+        return checkAuth;
+    }
+    
     const { deviceId, phoneNumber, message } = await req.json();
 
     // Validasi format nomor HP (hanya angka dan panjang wajar)

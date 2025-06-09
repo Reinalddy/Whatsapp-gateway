@@ -1,10 +1,17 @@
 export const runtime = 'nodejs';
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 import { prisma } from "@helpers/prismaCall";
 import * as fs from "fs";
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
     try {
+        const response = await apiMiddleware(req);
+        const checkAuth = await response.json();
+        if (checkAuth.code != 200) {
+            return checkAuth;
+        }
+        
         const {deviceId} = await req.json();
         if (!deviceId) {
             return NextResponse.json({

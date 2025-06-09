@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/helpers/prismaCall";
+import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 
 export async function GET(req:NextRequest) {
     try {
+        
+        const response = await apiMiddleware(req);
+        const checkAuth = await response.json();
+        if (checkAuth.code != 200) {
+            return checkAuth;
+        }
+
         const { searchParams } = new URL(req.url);
         const search = searchParams.get('search') || '';
         const page = parseInt(searchParams.get('page') || '1');

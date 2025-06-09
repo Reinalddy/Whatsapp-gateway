@@ -1,12 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 import { prisma } from "@/helpers/prismaCall";
-export async function GET() {
+export async function GET(req: NextRequest) {
 
     // GET ALL DEVICE USERS
     // TEMPORARY GET ALL DEVICE
     // TODO REI ADD SPESIFIK ID
-
     try {
+        
+        const response = await apiMiddleware(req);
+        const checkAuth = await response.json();
+        if (checkAuth.code != 200) {
+            return checkAuth;
+        }
+        
         const device = await prisma.whatsAppDevice.findMany({
             orderBy: {
                 createdAt: "desc"

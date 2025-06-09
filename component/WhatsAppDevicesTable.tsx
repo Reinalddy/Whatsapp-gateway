@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import WhatsAppScanQrModal from "./WhatsAppScanQrModal";
 import { Unplug, QrCode, Trash } from "lucide-react";
+import { fetchApi } from "@/helpers/fetchApi";
 
 interface WhatsAppDevice {
     id: string;
@@ -39,11 +40,12 @@ export default function WhatsAppDevicesTable({ registerFunction }: Props) {
             limit: limit.toString(),
         });
 
-        const res = await fetch(`/api/whatsapp/device-list?${params}`);
-        const json = await res.json();
+        const res = await fetchApi(`/api/whatsapp/device-list?${params}`,{
+            method: "GET",
+        });
 
-        setDevices(json.data);
-        setMeta(json.meta);
+        setDevices(res.data);
+        setMeta(res.meta);
     };
 
     const handleScanQrModalOPen = (deviceId: string) => {

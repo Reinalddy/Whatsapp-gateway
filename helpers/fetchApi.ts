@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { getUserToken } from "@/lib/authentication/getUserToken";
 /**
  * Fetches data from a given API endpoint using Axios.
  *
@@ -11,11 +12,14 @@ export async function fetchApi(
     options: AxiosRequestConfig = {}
 ): Promise<any> {
     try {
+        const token = await getUserToken();
+
         const response = await axios({
             url,
             method: options.method || "GET",
             headers: {
                 "Content-Type": "application/json",
+                "authorization": `Bearer ${token}`,
                 ...(options.headers || {}),
             },
             data: options.data,

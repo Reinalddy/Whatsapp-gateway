@@ -5,8 +5,16 @@ import { NextRequest } from "next/server";
 import { makeWASocket, useMultiFileAuthState, ConnectionState } from "baileys";
 import { ReadableStream } from "web-streams-polyfill";
 import { prisma } from "@/helpers/prismaCall";
+import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 
 export async function GET(req: NextRequest) {
+
+    const response = await apiMiddleware(req);
+    const checkAuth = await response.json();
+    if (checkAuth.code != 200) {
+        return checkAuth;
+    }
+
     const { searchParams } = new URL(req.url);
     const deviceId = searchParams.get("deviceId");
 
