@@ -21,8 +21,11 @@ model User {
   phoneNumber  String @unique
   roleId       String
   role         Role     @relation(fields: [roleId], references: [id])
+  limit        Int?
   password     String
   createdAt    DateTime @default(now())
+  whatsappDevices WhatsAppDevice[] // 1 user bisa punya banyak device
+  WhatsAppMessage WhatsAppMessage[] // 1 user bisa punya banyak message
 
   @@map("users") // 🔁 Nama tabel di database
 }
@@ -59,17 +62,21 @@ model RolePermission {
 
 model WhatsAppDevice {
   id          String   @id @default(cuid())
+  userId      Int
   name        String
   phoneNumber String
   sessionData Json?
   isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
   @@map("whatsapp_device")
 }
 
 model WhatsAppMessage {
   id          String   @id @default(cuid())
+  userId      Int
   deviceId    String
   content     String
   sender      String
@@ -78,6 +85,7 @@ model WhatsAppMessage {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
 
   @@map("whatsapp_message")
 }
