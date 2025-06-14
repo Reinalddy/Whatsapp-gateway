@@ -121,7 +121,7 @@ export default function RegisterForm() {
 
                 {isSuccess && (
                     <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-                        Registration successful! Check your email for confirmation.
+                        Login Success.
                     </div>
                 )}
 

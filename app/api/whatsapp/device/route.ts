@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
                 // id: crypto.randomUUID(),
                 name: deviceName,
                 // sessionData: "{}",
+                userId: checkAuth.data.id,
                 phoneNumber: deviceNumber,
                 isActive: false,
                 // createdAt: new Date(),

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import WhatsAppScanQrModal from "./WhatsAppScanQrModal";
 import { Unplug, QrCode, Trash } from "lucide-react";
 import { fetchApi } from "@/helpers/fetchApi";
+import Swal from "sweetalert2";
 
 interface WhatsAppDevice {
     id: string;
@@ -46,6 +47,48 @@ export default function WhatsAppDevicesTable({ registerFunction }: Props) {
 
         setDevices(res.data);
         setMeta(res.meta);
+    };
+
+    const deleteDevice = async (id: string) => {
+        const result = await Swal.fire({
+            title: "Do you want to delete this device?",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it",
+            denyButtonText: `Cancel`,
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetchApi(`/api/whatsapp/device-delete`, {
+                    method: "DELETE",
+                    data: {
+                        deviceId: id
+                    }
+                });
+
+                if (res.code === 200) {
+                    await Swal.fire({
+                        icon: "success",
+                        title: "Deleted!",
+                        text: res.message,
+                    });
+                    fetchDevices(); // refresh device list
+                } else {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Failed",
+                        text: res.message || "Something went wrong.",
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred while deleting the device.",
+                });
+            }
+        }
     };
 
     const handleScanQrModalOPen = (deviceId: string) => {
@@ -112,7 +155,7 @@ export default function WhatsAppDevicesTable({ registerFunction }: Props) {
                                     <td>
                                         {device.isActive ? <button className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 mt-2 flex items-center"><Unplug /><span className="ml-1"> Disconect</span></button> 
                                             : <button className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900 h-10 mt-2 flex items-center" onClick={() => handleScanQrModalOPen(device.id)}><QrCode /><span>Scan</span></button>}
-                                        <button className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 mt-2 flex items-center"><Trash /> <span>Delete </span></button>
+                                        <button className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 mt-2 flex items-center" onClick={() => deleteDevice(device.id)}><Trash /> <span>Delete </span></button>
                                     </td>
                                 </tr>
                             ))
@@ -150,9 +193,6 @@ export default function WhatsAppDevicesTable({ registerFunction }: Props) {
                 deviceId={deviceId} 
                 refreshTable={() => fetchDevices()}
             />
-
-
-
         </div>
     );
 }

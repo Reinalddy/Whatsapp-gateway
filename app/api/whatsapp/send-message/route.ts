@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
                 sender: device.phoneNumber,
                 recipient: phoneNumber,
                 status: "pending", // Status awal adalah pending
+                userId: checkAuth.data.id,
             },
         });
 

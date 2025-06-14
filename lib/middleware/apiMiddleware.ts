@@ -16,7 +16,7 @@ export async function apiMiddleware(request: NextRequest) {
 
     try {
         const decoded = verifyToken(token);
-        console.log(decoded);
+
         return NextResponse.json({
             code: 200,
             message: "Token valid",
