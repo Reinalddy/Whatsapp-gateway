@@ -73,7 +73,18 @@ export default function WhatsAppScanQrModal({ open, onClose, deviceId, refreshTa
                         <div className="flex flex-col items-center space-y-4">
                             {connected ? (
                                 <div className="text-green-500 text-lg">✅ Connected successfully</div>
-                            ) : <QRCode value={qr} size={300} />
+                            ) : (
+                                <div className="p-4 bg-white rounded-2xl shadow-lg animate-fade-in">
+                                    <QRCode
+                                        value={qr}
+                                        size={250}
+                                        className="rounded-md border border-gray-300"
+                                    />
+                                    <p className="mt-2 text-sm text-gray-500 text-center">
+                                        Scan QR code with WhatsApp
+                                    </p>
+                                </div>
+                            )
                             
                             }
                             

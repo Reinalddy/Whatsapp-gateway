@@ -43,7 +43,7 @@ export default function AllMessagesPage() {
         e.preventDefault();
         setPage(1); // reset to page 1 when search is submitted
         fetchMessages();
-      };
+    };
     
 
     return (

@@ -120,6 +120,7 @@ export default function WhatsAppDevicesTable({ registerFunction }: Props) {
                 <table className="min-w-full bg-white border border-gray-200">
                     <thead>
                         <tr className="bg-gray-100">
+                            <th className="text-left py-2 px-4 border-b">Device ID</th>
                             <th className="text-left py-2 px-4 border-b">Name</th>
                             <th className="text-left py-2 px-4 border-b">Phone Number</th>
                             <th className="text-left py-2 px-4 border-b">Status</th>
@@ -137,6 +138,7 @@ export default function WhatsAppDevicesTable({ registerFunction }: Props) {
                         ) : (
                             devices.map((device) => (
                                 <tr key={device.id}>
+                                    <td className="py-2 px-4 border-b">{device.id}</td>
                                     <td className="py-2 px-4 border-b">{device.name}</td>
                                     <td className="py-2 px-4 border-b">{device.phoneNumber}</td>
                                     <td className="py-2 px-4 border-b">

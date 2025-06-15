@@ -16,10 +16,12 @@ interface WhatsAppDevice {
     createdAt: string;
 }
 
-export default function SendMessageModal({ open, onClose }: Props) {
+export default function AiMessageModal({ open, onClose }: Props) {
 
     const [to, setTo] = useState("");
-    const [message, setMessage] = useState("");
+    const [age, setAge] = useState("");
+    const [gender, setGender] = useState("");
+    const [name, setName] = useState("");
     const [status, setStatus] = useState("");
     const [device, setDevice] = useState<WhatsAppDevice[]>([]);
     const [deviceId, setDeviceId] = useState("");
@@ -29,20 +31,20 @@ export default function SendMessageModal({ open, onClose }: Props) {
         setloading(true);
         e.preventDefault();
 
-        const res = await fetchApi("/api/whatsapp/send-message", {
+        const res = await fetchApi("/api/whatsapp/send-message-ai-birthday", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             data: {
-                deviceId : deviceId,
-                phoneNumber : to,
-                message : message
+                deviceId: deviceId,
+                phoneNumber: to,
+                gender: gender,
+                birthdayDate: age,
+                usersName: name
             },
         });
 
         setloading(false);
-        if(res.code == 200) {
-            // setStatus("Send Message Success ✅")
-            // toast.success("Send Message Success")
+        if (res.code == 200) {
             await Swal.fire({
                 icon: "success",
                 title: "Success Send Messages!",
@@ -66,15 +68,15 @@ export default function SendMessageModal({ open, onClose }: Props) {
                 headers: { "Content-Type": "application/json" },
             });
 
-            if(deviceMember.code == 200) {
+            if (deviceMember.code == 200) {
                 setDevice(deviceMember.data)
             }
         }
 
         getAllDeviceMember()
-        
+
         if (!open) {
-            
+
         }
     }, [open]);
 
@@ -118,14 +120,21 @@ export default function SendMessageModal({ open, onClose }: Props) {
                     </div>
 
                     <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-gray-700">Pesan:</label>
-                        <textarea
-                            id="message"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            className="mt-1 block w-full border rounded px-3 py-2"
-                            required
-                        />
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Users Name</label>
+                        <input type="text" className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
+                    </div>
+
+                    <div>
+                        <label htmlFor="gender" className="block text-sm font-medium text-gray-700">Gender</label>
+                        <select name="gender" id="gender" className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" value={gender} onChange={(e) => setGender(e.target.value)}>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="age" className="block text-sm font-medium text-gray-700">Age</label>
+                        <input type="text" className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Age" />
                     </div>
 
                     <button

@@ -11,6 +11,7 @@ import {
     Settings,
     ChevronRight,
     Menu,
+    Brain,
     X,
     LogOut,
 } from "lucide-react";
@@ -26,6 +27,7 @@ export default function Sidebar() {
         // { name: 'Failed Messages', icon: MailWarning, active: pathName == "/user/failed-messages" ? true : false, url: "/user/failed-messages" },
         // { name: 'Pending Messages', icon: MailQuestion, active: pathName == "/user/pending-messages" ? true : false, url: "/user/pending-messages" },
         { name: 'Messages', icon: MessageSquare, active: pathName == "/user/all-messages" ? true : false, url: "/user/all-messages" },
+        { name: 'Messages With AI', icon: Brain, active: pathName == "/user/send-birthday-messages-with-ai" ? true : false, url: "/user/send-birthday-messages-with-ai" },
         { name: 'Settings', icon: Settings, active: pathName == "/user/settings/whatsapp" ? true : false, url: "/user/settings/whatsapp" },
         {name: 'Logout', icon: LogOut, active: pathName == "user/logout" ? true : false, url: "/api/logout"}
     ];
