@@ -17,15 +17,16 @@ export async function GET(req:NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '5');
         const skip = (page - 1) * limit;
 
-        const where = search
-            ? {
+        const where = {
+            userId: checkAuth.data.id,
+            ...(search && {
                 OR: [
                     { content: { contains: search, mode: 'insensitive' } },
                     { sender: { contains: search, mode: 'insensitive' } },
                     { recipient: { contains: search, mode: 'insensitive' } },
                 ],
-            }
-            : {};
+            }),
+        };
 
         const [messages, total] = await Promise.all([
             prisma.whatsAppMessageWithAi.findMany({

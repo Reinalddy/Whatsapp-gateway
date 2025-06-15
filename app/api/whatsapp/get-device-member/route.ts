@@ -19,8 +19,10 @@ export async function GET(req: NextRequest) {
                 createdAt: "desc"
             },
             where: {
-                isActive: true
+                isActive: true,
+                userId: checkAuth.data.id
             }
+            
         });
 
         return NextResponse.json({

@@ -24,7 +24,8 @@ export async function GET(req: NextRequest) {
                 where: {
                     OR: [
                         { name: { contains: search.toLocaleLowerCase() } },
-                        { phoneNumber: { contains: search.toLocaleLowerCase() } }
+                        { phoneNumber: { contains: search.toLocaleLowerCase() } },
+                        {userId: checkAuth.data.id}
                     ]
                 },
                 orderBy: {
