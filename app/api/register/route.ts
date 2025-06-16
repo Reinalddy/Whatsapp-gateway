@@ -64,6 +64,7 @@ export async function POST(request: Request) {
                 email,
                 phoneNumber,
                 password: hashedPassword,
+                limit: 100, //temporary add limit 100
                 role: {
                     connect: {
                         name: "user"
