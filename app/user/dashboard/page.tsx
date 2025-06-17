@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from "react";
+import LiveClockWIB from "@/component/LiveClockWIB";
 import {
     Activity,
     Send,
@@ -7,6 +8,7 @@ import {
     AlertCircle,
     BarChart2,
 } from "lucide-react";
+import { fetchApi } from "@/helpers/fetchApi";
 
 // Mock data
 const initialData = {
@@ -21,35 +23,41 @@ const initialData = {
 export default function MessageDashboard() {
     const [data, setData] = useState(initialData);
     const [loading, setLoading] = useState(true);
+    const [totalFailedMessages, setTotalFailedMessages] = useState(0);
+    const [totalSentMessages, setTotalSentMessages] = useState(0);
+    const [totalPendingMessages, setTotalPendingMessages] = useState(0);
+    const [totalMessages, setTotalMessages] = useState(0);
+    const [dailyLimit, setDailyLimit] = useState(0);
 
     // Simulate data loading
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+        // const timer = setTimeout(() => {
+        //     setLoading(false);
+        // }, 1000);
 
-        return () => clearTimeout(timer);
+        // return () => clearTimeout(timer);
+        const getDashboardData = async () => {
+            setLoading(true);
+            const res = await fetchApi(`/api/whatsapp/get-messages-count`, {
+                method: "GET",
+            });
+
+            console.log(res.data);
+            setTotalFailedMessages(res.data.failed);
+            setTotalSentMessages(res.data.success);
+            setTotalPendingMessages(res.data.pending);
+            setTotalMessages(res.data.all);
+            setDailyLimit(res.data.dailyLimit);
+            setLoading(false);
+            console.log(dailyLimit);
+        }
+
+        getDashboardData();
+
     }, []);
 
-    // Simulate periodic data updates
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (!loading) {
-                setData(prev => ({
-                    ...prev,
-                    sent: prev.sent + Math.floor(Math.random() * 3),
-                    pending: prev.pending + Math.floor(Math.random() * 2) - 1,
-                    failed: prev.failed + (Math.random() > 0.8 ? 1 : 0),
-                    sentToday: prev.sentToday + Math.floor(Math.random() * 3)
-                }));
-            }
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [loading]);
-
     // Calculate percentage of daily limit used
-    const limitPercentage = (data.sentToday / data.dailyLimit) * 100;
+    const limitPercentage = (totalMessages / dailyLimit) * 100;
     const limitColorClass =
         limitPercentage > 90 ? "bg-red-500" :
             limitPercentage > 70 ? "bg-amber-500" :
@@ -68,13 +76,7 @@ export default function MessageDashboard() {
         <div className="flex-1 h-screen overflow-auto">
             {/* Main Content */}
             <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">Message Dashboard</h1>
-                    <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600">Last updated:</span>
-                        <span className="text-sm font-medium">{new Date().toLocaleTimeString()}</span>
-                    </div>
-                </div>
+                <LiveClockWIB />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {/* Total Messages */}
@@ -84,7 +86,7 @@ export default function MessageDashboard() {
                             <Activity className="h-5 w-5 text-blue-500" />
                         </div>
                         <div className="mt-2">
-                            <span className="text-3xl font-bold text-gray-800">{data.total}</span>
+                            <span className="text-3xl font-bold text-gray-800">{totalMessages}</span>
                         </div>
                     </div>
 
@@ -95,7 +97,7 @@ export default function MessageDashboard() {
                             <Send className="h-5 w-5 text-green-500" />
                         </div>
                         <div className="mt-2">
-                            <span className="text-3xl font-bold text-gray-800">{data.sent}</span>
+                            <span className="text-3xl font-bold text-gray-800">{totalSentMessages}</span>
                         </div>
                     </div>
 
@@ -106,7 +108,7 @@ export default function MessageDashboard() {
                             <Clock className="h-5 w-5 text-amber-500" />
                         </div>
                         <div className="mt-2">
-                            <span className="text-3xl font-bold text-gray-800">{data.pending}</span>
+                            <span className="text-3xl font-bold text-gray-800">{totalPendingMessages}</span>
                         </div>
                     </div>
 
@@ -117,7 +119,7 @@ export default function MessageDashboard() {
                             <AlertCircle className="h-5 w-5 text-red-500" />
                         </div>
                         <div className="mt-2">
-                            <span className="text-3xl font-bold text-gray-800">{data.failed}</span>
+                            <span className="text-3xl font-bold text-gray-800">{totalFailedMessages}</span>
                         </div>
                     </div>
                 </div>
@@ -127,7 +129,7 @@ export default function MessageDashboard() {
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-gray-600">Daily Limit</span>
                         <span className="text-sm font-medium">
-                            {data.sentToday} / {data.dailyLimit} ({limitPercentage.toFixed(1)}%)
+                            {dailyLimit}
                         </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
@@ -146,19 +148,19 @@ export default function MessageDashboard() {
                     </div>
                     <div className="flex h-40 items-end justify-around">
                         <div className="flex flex-col items-center">
-                            <div className="bg-green-500 w-16 rounded-t-md" style={{ height: `${(data.sent / data.total) * 100}%` }}></div>
+                            <div className="bg-green-500 w-16 rounded-t-md border-black" style={{ height: `${(totalSentMessages / totalMessages) * 100}px` }}></div>
                             <span className="mt-2 text-sm text-gray-600">Sent</span>
-                            <span className="text-xs font-medium">{((data.sent / data.total) * 100).toFixed(1)}%</span>
+                            <span className="text-xs font-medium">{((totalSentMessages / totalMessages) * 100).toFixed(1)}%</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <div className="bg-amber-500 w-16 rounded-t-md" style={{ height: `${(data.pending / data.total) * 100}%` }}></div>
+                            <div className="bg-amber-500 w-16 rounded-t-md" style={{ height: `${(totalPendingMessages / totalSentMessages) * 100}px` }}></div>
                             <span className="mt-2 text-sm text-gray-600">Pending</span>
-                            <span className="text-xs font-medium">{((data.pending / data.total) * 100).toFixed(1)}%</span>
+                            <span className="text-xs font-medium">{((totalPendingMessages / totalSentMessages) * 100).toFixed(1)}%</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <div className="bg-red-500 w-16 rounded-t-md" style={{ height: `${(data.failed / data.total) * 100}%` }}></div>
+                            <div className="bg-red-500 w-16 rounded-t-md" style={{ height: `${(totalFailedMessages / totalSentMessages) * 100}px` }}></div>
                             <span className="mt-2 text-sm text-gray-600">Failed</span>
-                            <span className="text-xs font-medium">{((data.failed / data.total) * 100).toFixed(1)}%</span>
+                            <span className="text-xs font-medium">{((totalFailedMessages / totalSentMessages) * 100).toFixed(1)}%</span>
                         </div>
                     </div>
                 </div>
