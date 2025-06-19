@@ -38,7 +38,7 @@ export default function AiMessageModal({ open, onClose }: Props) {
                 deviceId: deviceId,
                 phoneNumber: to,
                 gender: gender,
-                birthdayDate: age,
+                ageUsers: age,
                 usersName: name
             },
         });

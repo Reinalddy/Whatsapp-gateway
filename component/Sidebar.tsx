@@ -14,6 +14,7 @@ import {
     Brain,
     X,
     LogOut,
+    Book
 } from "lucide-react";
 // Sidebar navigation items
 
@@ -29,11 +30,12 @@ export default function Sidebar() {
         { name: 'Messages', icon: MessageSquare, active: pathName == "/user/all-messages" ? true : false, url: "/user/all-messages" },
         { name: 'Messages With AI', icon: Brain, active: pathName == "/user/send-birthday-messages-with-ai" ? true : false, url: "/user/send-birthday-messages-with-ai" },
         { name: 'Settings', icon: Settings, active: pathName == "/user/settings/whatsapp" ? true : false, url: "/user/settings/whatsapp" },
-        {name: 'Logout', icon: LogOut, active: pathName == "user/logout" ? true : false, url: "/api/logout"}
+        { name: 'Api Docs', icon: Book, active: pathName == "/user/settings/api-docs" ? true : false, url: "/user/settings/api-docs" },
+        { name: 'Logout', icon: LogOut, active: pathName == "user/logout" ? true : false, url: "/api/logout"}
     ];
 
     return (
-        <div>
+        <div className="sticky top-0 h-screen">
             {/* Mobile sidebar toggle */}
             <div className="lg:hidden fixed top-0 left-0 z-20 p-4">
                 <button

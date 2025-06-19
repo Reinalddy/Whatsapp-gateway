@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/helpers/prismaCall";
 import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 import { generateBirthdayMessage } from "@/lib/openAi/generateBirthdayMessage";
-import { calculateAge } from "@/helpers/helpers";
 
 /**
  * Kirim pesan WhatsApp ke nomor tujuan menggunakan Baileys
@@ -23,9 +22,9 @@ export async function POST(req: NextRequest) {
         return checkAuth;
     }
 
-    const { deviceId, phoneNumber, gender, birthdayDate, usersName } = await req.json();
+    const { deviceId, phoneNumber, gender, ageUsers, usersName } = await req.json();
 
-    if(!deviceId || !phoneNumber || !gender || !birthdayDate || !usersName) {
+    if(!deviceId || !phoneNumber || !gender || !ageUsers || !usersName) {
         return NextResponse.json({
             code: 400,
             message: "Missing required fields"
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        const age = birthdayDate;
+        const age = ageUsers;
         const prompt = `Buatkan ucapan ulang tahun yang singkat, jelas, hangat, dan menyentuh hati untuk seseorang bernama ${usersName}, dengan jenis kelamin ${gender}, dan berumur ${age} tahun.Sesuaikan gaya ucapannya dengan jenis kelamin dan umur tersebut dan ucapkan umurnya. Hindari kalimat yang bertele-tele.`;
 
         // GENERATE MESSAGE
@@ -184,6 +183,25 @@ export async function POST(req: NextRequest) {
                     notes: "Message sent successfully",
                 },
             });
+
+            // CARI DATA USERS
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: checkAuth.data.id,
+                },
+            });
+
+            // KURANGI LIMIT USERS
+            if (user && user.limit != null) {
+                await prisma.user.update({
+                    where: {
+                        id: checkAuth.data.id,
+                    },
+                    data: {
+                        limit: user.limit - 1,
+                    },
+                });
+            }
 
             return NextResponse.json({
                 code: 200,

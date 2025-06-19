@@ -169,6 +169,25 @@ export async function POST(req: NextRequest) {
                 },
             });
 
+            // CARI DATA USERS
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: checkAuth.data.id,
+                },
+            });
+
+            // KURANGI LIMIT USERS
+            if(user && user.limit != null) {
+                await prisma.user.update({
+                    where: {
+                        id: checkAuth.data.id,
+                    },
+                    data: {
+                        limit: user.limit - 1,
+                    },
+                });
+            }
+
             return NextResponse.json({
                 code: 200,
                 message: "Message sent successfully",
