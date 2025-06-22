@@ -100,7 +100,7 @@ const Table: React.FC<{
                                 onClick={() => handleSort('name')}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Name</span>
+                                    <span>ID</span>
                                     <SortIcon field="name" />
                                 </div>
                             </th>
@@ -109,7 +109,7 @@ const Table: React.FC<{
                                 onClick={() => handleSort('email')}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Email</span>
+                                    <span>Device ID</span>
                                     <SortIcon field="email" />
                                 </div>
                             </th>
@@ -118,7 +118,7 @@ const Table: React.FC<{
                                 onClick={() => handleSort('role')}
                             >
                                 <div className="flex items-center space-x-1">
-                                    <span>Role</span>
+                                    <span>Content</span>
                                     <SortIcon field="role" />
                                 </div>
                             </th>
@@ -127,7 +127,25 @@ const Table: React.FC<{
                                 onClick={() => handleSort('status')}
                             >
                                 <div className="flex items-center space-x-1">
+                                    <span>Recipient</span>
+                                    <SortIcon field="status" />
+                                </div>
+                            </th>
+                            <th
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                onClick={() => handleSort('status')}
+                            >
+                                <div className="flex items-center space-x-1">
                                     <span>Status</span>
+                                    <SortIcon field="status" />
+                                </div>
+                            </th>
+                            <th
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                onClick={() => handleSort('status')}
+                            >
+                                <div className="flex items-center space-x-1">
+                                    <span>Send Time</span>
                                     <SortIcon field="status" />
                                 </div>
                             </th>
