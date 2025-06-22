@@ -84,7 +84,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             code: 500,
             message: "something really wrong",
-            data : null
+            data : error
         })
     }
     

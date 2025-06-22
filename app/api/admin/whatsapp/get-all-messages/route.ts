@@ -12,11 +12,11 @@ export async function GET(req: NextRequest) {
         }
 
         // CHECK ROLE USERS, JIKA BUKAN ADMIN MAKA TOLAK REQUEST NYA
-        if (checkAuth.role !== 'admin') {
+        if (checkAuth.data.role != 'admin') {
             return NextResponse.json({
                 code: 403,
                 message: "Who are you?",
-                data: null
+                data: checkAuth
             })
         }
 

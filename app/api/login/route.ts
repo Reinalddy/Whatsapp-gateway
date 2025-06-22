@@ -33,8 +33,7 @@ export async function POST(request: Request) {
             id: user.id,
             email: user.email,
             role: user.role.name
-        });
-        
+        });        
 
         const passwordMatch = await bcrypt.compare(password, user.password);
         

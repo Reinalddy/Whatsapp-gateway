@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search,
     Edit,
@@ -9,6 +9,7 @@ import {
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
+import { fetchApi } from '@/helpers/fetchApi';
 interface User {
     id: number;
     name: string;
@@ -28,6 +29,16 @@ const Table: React.FC<{
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const itemsPerPage = 5;
+
+    // HANDLE CALL DATA API
+    const allMessages = async () => {
+        const data = await fetchApi('/api/admin/whatsapp/get-all-messages', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+        console.log(data);
+    }
+
+    useEffect(() => {
+        allMessages();
+    }, []);
 
     const filteredUsers = useMemo(() => {
         return users.filter(user =>

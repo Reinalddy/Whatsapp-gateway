@@ -155,7 +155,7 @@ export default function RegisterForm() {
                                     : field.charAt(0).toUpperCase() + field.slice(1)}
                             </label>
                             <input
-                                type={field.includes('password') ? 'password' : field === 'email' ? 'email' : 'text'}
+                                type={field.includes('password') ? 'password' : field === 'email' ? 'email' : field === 'confirmPassword' ? 'password' : 'text'}
                                 id={field}
                                 name={field}
                                 value={formData[field]}

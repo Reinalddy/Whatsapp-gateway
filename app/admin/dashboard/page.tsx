@@ -20,8 +20,6 @@ interface User {
     joinDate: string;
 }
 
-
-
 // Sample data
 const sampleUsers: User[] = [
     { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', joinDate: '2024-01-15' },
