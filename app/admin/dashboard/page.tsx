@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { use, useState, useEffect } from 'react';
 import StatCard from '@/component/admin/StatCard';
 import Modal from '@/component/admin/Modal';
 import Table from '@/component/admin/Table';
@@ -9,6 +9,7 @@ import {
     MailOpen,
     MailWarning
 } from 'lucide-react';
+import { fetchApi } from '@/helpers/fetchApi';
 
 // Types
 interface User {
@@ -69,11 +70,17 @@ const AdminDashboard: React.FC = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>(sampleUsers);
+    const [messageStatistic, setMessageStatistic] = useState([]);
 
     const handleEditUser = (user: User) => {
         setEditingUser(user);
         setModalOpen(true);
     };
+
+    const getMessageStatisTic = async () => {
+        const dataStatisTic = await fetchApi('/api/admin/whatsapp/get-all-statistic-message', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+        setMessageStatistic(dataStatisTic.data);
+    }
 
     const handleSaveUser = (userData: User) => {
         if (editingUser) {
@@ -87,20 +94,24 @@ const AdminDashboard: React.FC = () => {
         setUsers(users.filter(u => u.id !== id));
     };
 
+    useEffect(() => {
+        getMessageStatisTic()
+    }, [])
+
     return (
         <>
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto p-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    {statsData.map((stat, index) => (
-                        <StatCard key={index} {...stat} />
-                    ))}
+                    <StatCard key= {...stat} />
+                    {/* {messageStatistic.map((stat, index) => (
+                    ))} */}
                 </div>
 
                 {/* Table */}
                 <Table
-                    users={users}
+                    // users={users}
                     onEdit={handleEditUser}
                     onDelete={handleDeleteUser}
                 />

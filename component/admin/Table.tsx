@@ -20,47 +20,49 @@ interface User {
 }
 
 interface MessageData {
-    id: string;
-    deviceId: string;
-    createdAt: string;
-    updatedAt: string;
     content: string;
+    createdAt: string;
+    deviceId: string;
+    id: string;
     notes: string;
-    status: string;
     recipient: string;
+    sender: string;
+    status: string;
+    updatedAt: string;
+    userId: number;
 
 }
 
 const Table: React.FC<{
-    users: User[];
     onEdit: (user: User) => void;
     onDelete: (id: number) => void;
 }> = ({ users, onEdit, onDelete }) => {
-    const [sortField, setSortField] = useState<keyof User>('name');
+
+    const [sortField, setSortField] = useState<keyof MessageData>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [messageData, setMessageData] = useState([]);
-    const [statisticMessageData, setStatisticMessageData] = useState([]);
+    // const [messageData, setMessageData] = useState([]);
+    const [messageData, setMessageData] = useState<MessageData[]>([]);
     const itemsPerPage = 5;
-
-    // HANDLE CALL DATA API
+    // const [devices, setDevices] = useState<WhatsAppDevice[]>([]);
     const allMessages = async () => {
         const data = await fetchApi('/api/admin/whatsapp/get-all-messages', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-        const dataStatisTic = await fetchApi('/api/admin/whatsapp/get-all-statistic-message', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-        console.log(data);
-        console.log(dataStatisTic);
+        setMessageData(data.data);
     }
+    // HANDLE CALL DATA API
+
 
     useEffect(() => {
+
         allMessages();
     }, []);
 
     const filteredUsers = useMemo(() => {
-        return users.filter(user =>
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.role.toLowerCase().includes(searchTerm.toLowerCase())
+        return messageData.filter(message =>
+            message.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            message.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            message.sender.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [users, searchTerm]);
 
@@ -82,7 +84,7 @@ const Table: React.FC<{
 
     const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
 
-    const handleSort = (field: keyof User) => {
+    const handleSort = (field: keyof MessageData) => {
         if (field === sortField) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
@@ -91,7 +93,7 @@ const Table: React.FC<{
         }
     };
 
-    const SortIcon: React.FC<{ field: keyof User }> = ({ field }) => {
+    const SortIcon: React.FC<{ field: keyof MessageData }> = ({ field }) => {
         if (field !== sortField) return <ChevronUp className="w-4 h-4 opacity-30" />;
         return sortDirection === 'asc' ?
             <ChevronUp className="w-4 h-4" /> :
@@ -124,38 +126,38 @@ const Table: React.FC<{
                         <tr>
                             <th
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSort('name')}
+                                onClick={() => handleSort('id')}
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>ID</span>
-                                    <SortIcon field="name" />
+                                    <SortIcon field="id" />
                                 </div>
                             </th>
                             <th
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSort('email')}
+                                onClick={() => handleSort('deviceId')}
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>Device ID</span>
-                                    <SortIcon field="email" />
+                                    <SortIcon field="deviceId" />
                                 </div>
                             </th>
                             <th
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSort('role')}
+                                onClick={() => handleSort('content')}
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>Content</span>
-                                    <SortIcon field="role" />
+                                    <SortIcon field="content" />
                                 </div>
                             </th>
                             <th
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSort('status')}
+                                onClick={() => handleSort('recipient')}
                             >
                                 <div className="flex items-center space-x-1">
                                     <span>Recipient</span>
-                                    <SortIcon field="status" />
+                                    <SortIcon field="recipient" />
                                 </div>
                             </th>
                             <th
@@ -185,24 +187,25 @@ const Table: React.FC<{
                         {paginatedUsers.map((user) => (
                             <tr key={user.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="font-medium text-gray-900">{user.name}</div>
+                                    <div className="font-medium text-gray-900">{user.id}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-gray-600">{user.email}</div>
+                                    <div className="text-gray-600">{user.deviceId}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'Admin' ? 'bg-purple-100 text-purple-800' :
-                                        user.role === 'Moderator' ? 'bg-blue-100 text-blue-800' :
-                                            'bg-gray-100 text-gray-800'
-                                        }`}>
-                                        {user.role}
-                                    </span>
+                                    <div className="text-gray-600">{user.content}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    <div className="text-gray-600">{user.recipient}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
                                         {user.status}
                                     </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-gray-600">{user.createdAt}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                     <button
