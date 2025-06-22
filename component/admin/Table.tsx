@@ -19,6 +19,18 @@ interface User {
     joinDate: string;
 }
 
+interface MessageData {
+    id: string;
+    deviceId: string;
+    createdAt: string;
+    updatedAt: string;
+    content: string;
+    notes: string;
+    status: string;
+    recipient: string;
+
+}
+
 const Table: React.FC<{
     users: User[];
     onEdit: (user: User) => void;
@@ -28,12 +40,16 @@ const Table: React.FC<{
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
+    const [messageData, setMessageData] = useState([]);
+    const [statisticMessageData, setStatisticMessageData] = useState([]);
     const itemsPerPage = 5;
 
     // HANDLE CALL DATA API
     const allMessages = async () => {
         const data = await fetchApi('/api/admin/whatsapp/get-all-messages', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+        const dataStatisTic = await fetchApi('/api/admin/whatsapp/get-all-statistic-message', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
         console.log(data);
+        console.log(dataStatisTic);
     }
 
     useEffect(() => {
