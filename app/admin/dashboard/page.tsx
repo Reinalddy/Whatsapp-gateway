@@ -70,10 +70,14 @@ const AdminDashboard: React.FC = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>(sampleUsers);
-    const [messageStatistic, setMessageStatistic] = useState([]);
+    const [messageStatistic, setMessageStatistic] = useState({
+        all: 0,
+        failed: 0,
+        pending: 0,
+        success: 0
+    });
 
-    const handleEditUser = (user: User) => {
-        setEditingUser(user);
+    const handleEditUser = (message) => {
         setModalOpen(true);
     };
 
@@ -102,12 +106,12 @@ const AdminDashboard: React.FC = () => {
         <>
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto p-6">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard key= {...stat} />
-                    {/* {messageStatistic.map((stat, index) => (
-                    ))} */}
-                </div>
+                <StatCard 
+                    total={messageStatistic.all}
+                    success={messageStatistic.success}
+                    failed={messageStatistic.failed}
+                    pending={messageStatistic.pending}
+                />
 
                 {/* Table */}
                 <Table
