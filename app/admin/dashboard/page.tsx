@@ -1,84 +1,54 @@
 'use client';
-import React, { use, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from '@/component/admin/StatCard';
 import Modal from '@/component/admin/Modal';
 import Table from '@/component/admin/Table';
-import {
-    Users,
-    MessageSquare,
-    MailOpen,
-    MailWarning
-} from 'lucide-react';
+import LoadingSpinner from '@/component/LoadingSpinner';
 import { fetchApi } from '@/helpers/fetchApi';
+import Swal from 'sweetalert2';
 
-// Types
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    status: 'active' | 'inactive';
-    joinDate: string;
+
+interface MessageData {
+    content: string;
+    createdAt: string;
+    deviceId: string;
+    id: string;
+    notes: string;
+    recipient: string;
+    sender: string;
+    status: string;
+    updatedAt: string;
+    userId: number;
 }
-
-// Sample data
-const sampleUsers: User[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', joinDate: '2024-01-15' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'active', joinDate: '2024-02-20' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'User', status: 'inactive', joinDate: '2024-03-10' },
-    { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', role: 'Moderator', status: 'active', joinDate: '2024-01-05' },
-    { id: 5, name: 'David Brown', email: 'david@example.com', role: 'User', status: 'active', joinDate: '2024-04-12' },
-    { id: 6, name: 'Emily Davis', email: 'emily@example.com', role: 'User', status: 'inactive', joinDate: '2024-02-28' },
-    { id: 7, name: 'Chris Wilson', email: 'chris@example.com', role: 'Admin', status: 'active', joinDate: '2024-03-15' },
-    { id: 8, name: 'Lisa Anderson', email: 'lisa@example.com', role: 'User', status: 'active', joinDate: '2024-04-01' },
-];
-
-const statsData = [
-    {
-        title: 'Total Users',
-        value: '2,543',
-        change: '+12.5%',
-        trend: 'up',
-        icon: <Users className="w-6 h-6" />
-    },
-    {
-        title: 'Total Messages',
-        value: '18,293',
-        change: '+8.2%',
-        trend: 'up',
-        icon: <MessageSquare className="w-6 h-6" />
-    },
-    {
-        title: 'Sent Messages',
-        value: '10,000',
-        change: '-3.1%',
-        trend: 'down',
-        icon: <MailOpen className="w-6 h-6" />
-    },
-    {
-        title: 'Failed Messages',
-        value: '200',
-        change: '+15.3%',
-        trend: 'up',
-        icon: <MailWarning className="w-6 h-6" />
-    }
-];
 
 // Main Dashboard Component
 const AdminDashboard: React.FC = () => {
     
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [users, setUsers] = useState<User[]>(sampleUsers);
+    const [loading, setLoading] = useState(false);
     const [messageStatistic, setMessageStatistic] = useState({
         all: 0,
         failed: 0,
         pending: 0,
         success: 0
     });
+    const [messages, setMessages] = useState<MessageData>({
+        content: '',
+        createdAt: '',
+        deviceId: '',
+        id: '',
+        notes: '',
+        recipient: '',
+        sender: '',
+        status: '',
+        updatedAt: '',
+        userId: 0
+    });
 
-    const handleEditUser = (message) => {
+    const handleResendMessage = (message: MessageData) => {
+        console.log(message);
         setModalOpen(true);
+        setMessages(message);
     };
 
     const getMessageStatisTic = async () => {
@@ -86,16 +56,40 @@ const AdminDashboard: React.FC = () => {
         setMessageStatistic(dataStatisTic.data);
     }
 
-    const handleSaveUser = (userData: User) => {
-        if (editingUser) {
-            setUsers(users.map(u => u.id === userData.id ? userData : u));
-        } else {
-            setUsers([...users, userData]);
+    const handleResendMessageSend = async (message: MessageData) => {
+        console.log(message);
+        setLoading(true);
+        // HANDLE RESEND MESSAGE
+        try {
+            const res = await fetchApi('/api/admin/whatsapp/resend-message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
+                phoneNumber: message.recipient,
+                deviceId: message.deviceId,
+                message: message.content
+            } });
+    
+            if(res.code == 200) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: res.message
+                })
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: res.message
+                })
+            }
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            console.log(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: 'Something went wrong'
+            });
         }
-    };
-
-    const handleDeleteUser = (id: number) => {
-        setUsers(users.filter(u => u.id !== id));
     };
 
     useEffect(() => {
@@ -105,6 +99,7 @@ const AdminDashboard: React.FC = () => {
     return (
         <>
             {/* Main Content */}
+            {loading && <LoadingSpinner />}
             <main className="flex-1 overflow-y-auto p-6">
                 <StatCard 
                     total={messageStatistic.all}
@@ -115,9 +110,8 @@ const AdminDashboard: React.FC = () => {
 
                 {/* Table */}
                 <Table
-                    // users={users}
-                    onEdit={handleEditUser}
-                    onDelete={handleDeleteUser}
+                    modalStatus={modalOpen}
+                    onEdit={handleResendMessage}
                 />
             </main>
 
@@ -125,8 +119,8 @@ const AdminDashboard: React.FC = () => {
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                user={editingUser}
-                onSave={handleSaveUser}
+                message={messages}
+                onSave={handleResendMessageSend}
             />
             
 

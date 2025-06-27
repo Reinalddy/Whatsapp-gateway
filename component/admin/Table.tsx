@@ -3,22 +3,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search,
     Edit,
-    Trash2,
     ChevronUp,
     ChevronDown,
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
 import { fetchApi } from '@/helpers/fetchApi';
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    status: 'active' | 'inactive';
-    joinDate: string;
-}
 
 interface MessageData {
     content: string;
@@ -34,11 +24,11 @@ interface MessageData {
 }
 
 interface TableProps {
-    onEdit: (user: Partial<MessageData>) => void;
-    onDelete: (id: string) => void;
+    onEdit: (message: MessageData) => void;
+    modalStatus: boolean
 }
 
-const Table: React.FC<TableProps> = ({ onEdit, onDelete }) => {
+const Table: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
     const [sortField, setSortField] = useState<keyof MessageData>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -60,7 +50,7 @@ const Table: React.FC<TableProps> = ({ onEdit, onDelete }) => {
 
     useEffect(() => {
         fetchMessages();
-    }, []);
+    }, [modalStatus]);
 
     const filteredMessages = useMemo(() => {
         return messageData.filter(message =>
@@ -155,12 +145,12 @@ const Table: React.FC<TableProps> = ({ onEdit, onDelete }) => {
                                 </td>
                                 <td className="px-6 py-4">{message.createdAt}</td>
                                 <td className="px-6 py-4 space-x-2">
-                                    <button onClick={() => onEdit(message)} className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50">
+                                    <button onClick={() => onEdit(message)} className={`text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 ${message.status === 'success' ? 'hidden' : ''}`}>
                                         <Edit className="w-4 h-4" />
                                     </button>
-                                    <button onClick={() => onDelete(message.id)} className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50">
+                                    {/* <button onClick={() => onDelete(message.id)} className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50">
                                         <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    </button> */}
                                 </td>
                             </tr>
                         ))}

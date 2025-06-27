@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     if (checkAuth.code != 200) {
         return checkAuth;
     }
-    
+
     const { deviceId, phoneNumber, message } = await req.json();
 
     // Validasi format nomor HP (hanya angka dan panjang wajar)
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
                 message: "Device is not active. Please scan the QR code first.",
             }, { status: 400 });
         }
-        
+
         const authDir = `auth/${deviceId}`;
 
         // Pastikan direktori autentikasi masih ada
@@ -132,16 +132,16 @@ export async function POST(req: NextRequest) {
                 }
             });
         })
-        
+
         // Format nomor tujuan ke format JID
         const jid = phoneNumber.includes("@s.whatsapp.net") ? phoneNumber : `${phoneNumber}@s.whatsapp.net`;
-        
+
         if (sock?.user) {
             // Kirim pesan teks
             try {
                 await sock.sendMessage(jid, { text: message });
             } catch (error) {
-               await prisma.whatsAppMessage.updateMany({
+                await prisma.whatsAppMessage.updateMany({
                     where: {
                         deviceId: device.id,
                         recipient: phoneNumber,
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
                 }
             });
         }
-        
+
     } catch (error) {
         console.error("Error sending message:", error);
         return NextResponse.json({
@@ -208,6 +208,6 @@ export async function POST(req: NextRequest) {
             message: "Error sending message",
             error
         });
-        
+
     }
 }

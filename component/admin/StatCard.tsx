@@ -72,16 +72,6 @@ export default function Statcard({total, success, failed, pending}: MessageStats
                                         <div className="text-gray-600 font-medium text-sm">
                                             {item.label}
                                         </div>
-
-                                        {/* Progress bar for visual representation */}
-                                        <div className="mt-4 bg-gray-200 rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className={`h-full ${item.color.replace('text-', 'bg-')} transition-all duration-1000 ease-out`}
-                                                style={{
-                                                    width: `${(item.value / total) * 100}%`
-                                                }}
-                                            ></div>
-                                        </div>
                                     </div>
                                 </div>
                             );
