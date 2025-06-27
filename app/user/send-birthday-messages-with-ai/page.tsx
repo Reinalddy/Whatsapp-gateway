@@ -43,7 +43,7 @@ export default function SendBirthdayMessagesWithAiPage() {
     useEffect(() => {
         fetchMessages();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
+    }, [page, modal]);
 
     return (
             <div className="w-full p-6 bg-white rounded-lg shadow-md">
@@ -102,7 +102,17 @@ export default function SendBirthdayMessagesWithAiPage() {
                                     <td className="p-2 border">{msg.content}</td>
                                     <td className="p-2 border">{msg.sender}</td>
                                     <td className="p-2 border">{msg.recipient}</td>
-                                    <td className="p-2 border">{msg.status}</td>
+                                    <td className="p-2 border">
+                                        {msg.status === 'success' ? (
+                                            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                                {msg.status}
+                                            </span>
+                                        ) : (
+                                            <span className="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                                {msg.status}
+                                            </span>
+                                        )}
+                                    </td>
                                     <td className="p-2 border">{new Date(msg.createdAt).toLocaleString()}</td>
                                 </tr>
                             ))}

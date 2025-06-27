@@ -10,18 +10,8 @@ import {
 } from "lucide-react";
 import { fetchApi } from "@/helpers/fetchApi";
 
-// Mock data
-const initialData = {
-    total: 1247,
-    sent: 982,
-    pending: 189,
-    failed: 76,
-    dailyLimit: 1500,
-    sentToday: 756
-};
 
 export default function MessageDashboard() {
-    const [data, setData] = useState(initialData);
     const [loading, setLoading] = useState(true);
     const [totalFailedMessages, setTotalFailedMessages] = useState(0);
     const [totalSentMessages, setTotalSentMessages] = useState(0);
@@ -29,13 +19,7 @@ export default function MessageDashboard() {
     const [totalMessages, setTotalMessages] = useState(0);
     const [dailyLimit, setDailyLimit] = useState(0);
 
-    // Simulate data loading
     useEffect(() => {
-        // const timer = setTimeout(() => {
-        //     setLoading(false);
-        // }, 1000);
-
-        // return () => clearTimeout(timer);
         const getDashboardData = async () => {
             setLoading(true);
             const res = await fetchApi(`/api/whatsapp/get-messages-count`, {
@@ -121,22 +105,6 @@ export default function MessageDashboard() {
                         <div className="mt-2">
                             <span className="text-3xl font-bold text-gray-800">{totalFailedMessages}</span>
                         </div>
-                    </div>
-                </div>
-
-                {/* Daily Limit */}
-                <div className="bg-white p-4 rounded-md shadow mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-600">Daily Limit</span>
-                        <span className="text-sm font-medium">
-                            {dailyLimit}
-                        </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                        <div
-                            className={`h-2.5 rounded-full ${limitColorClass}`}
-                            style={{ width: `${Math.min(limitPercentage, 100)}%` }}
-                        ></div>
                     </div>
                 </div>
 
