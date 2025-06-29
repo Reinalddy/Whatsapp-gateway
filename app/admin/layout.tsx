@@ -7,6 +7,7 @@ import ClientWrapper from './ClientWrapper';
 import {
     Menu,
 } from 'lucide-react';
+import { getUserFromToken } from '@/lib/authentication/getUserFromToken';
 
 export default function UsersLayout({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);

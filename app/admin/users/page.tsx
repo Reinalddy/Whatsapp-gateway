@@ -1,11 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import StatCard from '@/component/admin/StatCard';
 import Modal from '@/component/admin/Modal';
-import Table from '@/component/admin/Table';
 import LoadingSpinner from '@/component/LoadingSpinner';
 import { fetchApi } from '@/helpers/fetchApi';
 import Swal from 'sweetalert2';
+import UsersTable from '@/component/admin/UsersTable';
 
 
 interface MessageData {
@@ -22,16 +21,10 @@ interface MessageData {
 }
 
 // Main Dashboard Component
-const AdminDashboard: React.FC = () => {
-    
+const AdminUsers: React.FC = () => {
+
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [messageStatistic, setMessageStatistic] = useState({
-        all: 0,
-        failed: 0,
-        pending: 0,
-        success: 0
-    });
     const [messages, setMessages] = useState<MessageData>({
         content: '',
         createdAt: '',
@@ -51,23 +44,20 @@ const AdminDashboard: React.FC = () => {
         setMessages(message);
     };
 
-    const getMessageStatisTic = async () => {
-        const dataStatisTic = await fetchApi('/api/admin/whatsapp/get-all-statistic-message', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-        setMessageStatistic(dataStatisTic.data);
-    }
-
     const handleResendMessageSend = async (message: MessageData) => {
         console.log(message);
         setLoading(true);
         // HANDLE RESEND MESSAGE
         try {
-            const res = await fetchApi('/api/admin/whatsapp/resend-message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
-                phoneNumber: message.recipient,
-                deviceId: message.deviceId,
-                message: message.content
-            } });
-    
-            if(res.code == 200) {
+            const res = await fetchApi('/api/admin/whatsapp/resend-message', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
+                    phoneNumber: message.recipient,
+                    deviceId: message.deviceId,
+                    message: message.content
+                }
+            });
+
+            if (res.code == 200) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
@@ -92,24 +82,24 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        getMessageStatisTic()
-    }, [])
+    // useEffect(() => {
+    //     getMessageStatisTic()
+    // }, [])
 
     return (
         <>
             {/* Main Content */}
             {loading && <LoadingSpinner />}
             <main className="flex-1 overflow-y-auto p-6">
-                <StatCard 
+                {/* <StatCard
                     total={messageStatistic.all}
                     success={messageStatistic.success}
                     failed={messageStatistic.failed}
                     pending={messageStatistic.pending}
-                />
+                /> */}
 
                 {/* Table */}
-                <Table
+                <UsersTable
                     modalStatus={modalOpen}
                     onEdit={handleResendMessage}
                 />
@@ -122,10 +112,10 @@ const AdminDashboard: React.FC = () => {
                 message={messages}
                 onSave={handleResendMessageSend}
             />
-            
+
 
         </>
     );
 };
 
-export default AdminDashboard;
+export default AdminUsers;

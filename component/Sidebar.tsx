@@ -18,7 +18,18 @@ import {
 } from "lucide-react";
 // Sidebar navigation items
 
-export default function Sidebar() {
+interface UserData {
+    id: string,
+    email: string,
+    role: string
+
+}
+
+type SidebarProps = {
+    user: UserData;
+  };
+
+export default function Sidebar({ user }: SidebarProps) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const pathName = usePathname();
 
@@ -104,8 +115,7 @@ export default function Sidebar() {
                         </div>
                     </div>
                     <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-800">User Name</p>
-                        <p className="text-xs text-gray-500">user@example.com</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
                 </div>
             </div>

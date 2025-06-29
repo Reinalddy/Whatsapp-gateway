@@ -11,8 +11,7 @@ export async function getUserFromToken() {
 
     try {        
         const user = verifyToken(token) as {
-            userId: string;
-            name: string;
+            id: string;
             email: string;
             role: string;
         };

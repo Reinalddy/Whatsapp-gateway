@@ -3,16 +3,17 @@ import {
     Home,
     Users,
     MessageSquare,
-    Settings,
-    BarChart3,
 } from 'lucide-react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+    const pathName = usePathname();
     const menuItems = [
-        { icon: <Home className="w-5 h-5" />, label: 'Dashboard', active: true },
-        { icon: <Users className="w-5 h-5" />, label: 'Users', active: false },
-        { icon: <MessageSquare className="w-5 h-5" />, label: 'Messages', active: false },
-        { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', active: false },
-        { icon: <Settings className="w-5 h-5" />, label: 'Settings', active: false },
+        { icon: <Home className="w-5 h-5" />, label: 'Dashboard', active: pathName == '/admin/dashboard' ? true : false, url: '/admin/dashboard' },
+        { icon: <Users className="w-5 h-5" />, label: 'Users', active: pathName == '/admin/users' ? true : false, url: '/admin/users' },
+        { icon: <MessageSquare className="w-5 h-5" />, label: 'Messages', active: pathName == '/admin/messages' ? true : false, url: '/admin/messages' },
+        // { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', active: false },
+        // { icon: <Settings className="w-5 h-5" />, label: 'Settings', active: false },
     ];
 
     return (
@@ -43,9 +44,9 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
 
                 <nav className="mt-6">
                     {menuItems.map((item, index) => (
-                        <a
+                        <Link
                             key={index}
-                            href="#"
+                            href={item.url}
                             className={`
                                 flex items-center px-6 py-3 mx-3 rounded-lg transition-colors duration-200
                                 ${item.active
@@ -56,7 +57,7 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
                         >
                             {item.icon}
                             <span className="ml-3 font-medium">{item.label}</span>
-                        </a>
+                        </Link>
                     ))}
                 </nav>
             </div>

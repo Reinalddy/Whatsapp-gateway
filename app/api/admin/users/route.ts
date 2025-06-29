@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/helpers/prismaCall";
 import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@helpers/prismaCall";
 
 export async function GET(req: NextRequest) {
     try {
-        // GET ALL MESSAGES USERS
+
         const response = await apiMiddleware(req);
         const checkAuth = await response.json();
         if (checkAuth.code != 200) {
@@ -20,32 +20,22 @@ export async function GET(req: NextRequest) {
             })
         }
 
-        const messages = await prisma.whatsAppMessage.findMany({
+        const users = await prisma.user.findMany({
             orderBy: {
                 createdAt: "desc"
             },
         });
-
-        const messagesAi = await prisma.whatsAppMessageWithAi.findMany({
-            orderBy: {
-                createdAt: "desc"
-            },
-        });
-
-        // MERGE MESSAGES AND MESSAGES AI
-        const allMessages = [...messages, ...messagesAi];
 
         return NextResponse.json({
-            'code': 200,
-            'message': "success",
-            'data': allMessages
-        });
+            code: 200,
+            message: "Get Users Success",
+            data: users
+        })
     } catch (error) {
-        console.log(error);
         return NextResponse.json({
-            'code': 500,
-            'message': "something really wrong",
-            'data': error
-        });
+            code: 500,
+            message: "Internal Server Error",
+            data: error
+        })
     }
 }

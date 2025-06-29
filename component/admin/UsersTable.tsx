@@ -28,7 +28,7 @@ interface TableProps {
     modalStatus: boolean
 }
 
-const Table: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
+const UsersTable: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
     const [sortField, setSortField] = useState<keyof MessageData>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -136,7 +136,7 @@ const Table: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
                                 <td className="px-6 py-4">{message.id}</td>
                                 <td className="px-6 py-4">{message.deviceId}</td>
                                 {/* only show 100 characters */}
-                                <td className="p-px-11 p-py-4">{message.content.slice(0,30) + (message.content.length > 30 ? '...' : '')}</td>
+                                <td className="p-px-11 p-py-4">{message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '')}</td>
                                 <td className="px-6 py-4">{message.recipient}</td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${message.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -191,4 +191,4 @@ const Table: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
     );
 };
 
-export default Table;
+export default UsersTable;

@@ -28,5 +28,9 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
         return <div className="p-4">Loading or unauthorized...</div>;
     }
 
+    if(user.role != "admin") {
+        return <div className="p-4">You are not admin</div>;
+    }
+
     return <>{children}</>;
 }
