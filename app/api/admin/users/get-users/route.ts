@@ -20,16 +20,46 @@ export async function GET(req: NextRequest) {
             })
         }
 
+        // get users with role name
         const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phoneNumber: true,
+                createdAt: true,
+                status: true,
+                roleId: true,
+                role: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+            },
             orderBy: {
-                createdAt: "desc"
+                createdAt: 'desc',
             },
         });
+          
+        // const users = await prisma.user.findMany({
+        //     orderBy: {
+        //         createdAt: "desc"
+        //     },clear
+        // });
+
+        // GET ROLE LIST
+        const roleList = await prisma.role.findMany();
+
+        const data = {
+            users: users,
+            roleList: roleList
+        }
 
         return NextResponse.json({
             code: 200,
             message: "Get Users Success",
-            data: users
+            data: data
         })
     } catch (error) {
         return NextResponse.json({

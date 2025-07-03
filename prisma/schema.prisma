@@ -19,6 +19,7 @@ model User {
   name         String
   email        String   @unique
   phoneNumber  String @unique
+  status       String @default("active") // active, inactive
   roleId       String
   role         Role     @relation(fields: [roleId], references: [id])
   limit        Int?

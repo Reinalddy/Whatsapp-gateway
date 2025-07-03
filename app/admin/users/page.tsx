@@ -1,10 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Modal from '@/component/admin/Modal';
 import LoadingSpinner from '@/component/LoadingSpinner';
 import { fetchApi } from '@/helpers/fetchApi';
 import Swal from 'sweetalert2';
 import UsersTable from '@/component/admin/UsersTable';
+import ModalUsers from '@/component/admin/ModalUsers';
 
 
 interface MessageData {
@@ -20,6 +20,29 @@ interface MessageData {
     userId: number;
 }
 
+interface Role {
+    id: string,
+    name: string
+}
+
+interface UserResponse {
+    name: string,
+    email: string,
+    createdAt: string,
+    id: number,
+    phoneNumber: string,
+    status: string,
+    role: Role,
+    roleId: string
+}
+
+interface UserUpdate {
+    name: string,
+    email: string,
+    phoneNumber: string,
+    status: string,
+    roleId: string
+}
 // Main Dashboard Component
 const AdminUsers: React.FC = () => {
 
@@ -37,39 +60,52 @@ const AdminUsers: React.FC = () => {
         updatedAt: '',
         userId: 0
     });
+    const [user, setUsers] = useState<UserResponse>({
+        name: '',
+        email: '',
+        createdAt: '',
+        id: 0,
+        phoneNumber: '',
+        status: '',
+        role: {
+            id: '',
+            name: ''
+        },
+        roleId: ''
+    });
 
-    const handleResendMessage = (message: MessageData) => {
-        console.log(message);
+    const handleUsersEdit = (user: UserResponse) => {
+        setUsers(user);
         setModalOpen(true);
-        setMessages(message);
+        console.log(user);
     };
 
-    const handleResendMessageSend = async (message: MessageData) => {
-        console.log(message);
+    const handleUpdateUsers = async (user: UserUpdate) => {
+        console.log(user);
         setLoading(true);
         // HANDLE RESEND MESSAGE
         try {
-            const res = await fetchApi('/api/admin/whatsapp/resend-message', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
-                    phoneNumber: message.recipient,
-                    deviceId: message.deviceId,
-                    message: message.content
-                }
-            });
+            // const res = await fetchApi('/api/admin/whatsapp/resend-message', {
+            //     method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
+            //         phoneNumber: message.recipient,
+            //         deviceId: message.deviceId,
+            //         message: message.content
+            //     }
+            // });
 
-            if (res.code == 200) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: res.message
-                })
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Failed',
-                    text: res.message
-                })
-            }
+            // if (res.code == 200) {
+            //     Swal.fire({
+            //         icon: 'success',
+            //         title: 'Success',
+            //         text: res.message
+            //     })
+            // } else {
+            //     Swal.fire({
+            //         icon: 'error',
+            //         title: 'Failed',
+            //         text: res.message
+            //     })
+            // }
             setLoading(false);
         } catch (error) {
             setLoading(false);
@@ -101,16 +137,16 @@ const AdminUsers: React.FC = () => {
                 {/* Table */}
                 <UsersTable
                     modalStatus={modalOpen}
-                    onEdit={handleResendMessage}
+                    onEdit={handleUsersEdit}
                 />
             </main>
 
             {/* Modal */}
-            <Modal
+            <ModalUsers
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                message={messages}
-                onSave={handleResendMessageSend}
+                user={user}
+                onSave={handleUpdateUsers}
             />
 
 
