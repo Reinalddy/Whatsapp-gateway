@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {
     X,
 } from 'lucide-react';
+import { fetchApi } from '@/helpers/fetchApi';
 
 interface Role {
     id: string,
@@ -16,11 +17,11 @@ interface UserResponse {
     id: number,
     phoneNumber: string,
     status: string,
-    role: Role,
     roleId: string
 }
 
 interface UserUpdate {
+    id : number,
     name: string,
     email: string,
     phoneNumber: string,
@@ -36,6 +37,7 @@ const ModalUsers: React.FC<{
     onSave: (user: UserUpdate) => void;
 }> = ({ isOpen, onClose, user, onSave }) => {
     const [formData, setFormData] = useState<UserUpdate>({
+        id: 0,
         name: '',
         email: '',
         phoneNumber: '',
@@ -43,11 +45,25 @@ const ModalUsers: React.FC<{
         roleId: ''
     });
 
+    const [roleList, setRoleList] = useState<Role[]>([]);
+
     React.useEffect(() => {
+        const getRoleList = async () => {
+            const res = await fetchApi('/api/admin/get-role-list', {
+                method: 'GET',
+            });
+
+            if (res.code == 200) {
+                setRoleList(res.data);
+            }
+        }
+
+        getRoleList();
         if (user) {
             setFormData(user);
         } else {
             setFormData({
+                id: 0,
                 name: '',
                 email: '',
                 phoneNumber: '',
@@ -60,6 +76,7 @@ const ModalUsers: React.FC<{
     const handleSubmit = () => {
         if (!formData.name || !formData.email) return;
         const userData: UserUpdate = {
+            id: formData.id,
             name: formData.name,
             email: formData.email,
             phoneNumber: formData.phoneNumber,
@@ -68,6 +85,10 @@ const ModalUsers: React.FC<{
         };
         onSave(userData);
         onClose();
+    };
+
+    const handleChangeRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setFormData({ ...formData, roleId: e.target.value });
     };
 
     if (!isOpen) return null;
@@ -95,7 +116,7 @@ const ModalUsers: React.FC<{
                             value={formData.name}
                             // onChange={(e) => setFormData({ ...formData, deviceId: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            readOnly
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
                         />
                     </div>
@@ -113,26 +134,28 @@ const ModalUsers: React.FC<{
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <input
-                            type="text"
+                        <select
+                            name="status"
+                            id="status"
                             value={formData.status}
-                            // onChange={(e) => setFormData({ ...formData, recipient: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            className="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:placeholder-gray-40 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             required
-                            readOnly
-                        />
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                        {/* <input
-                            type="text"
-                            value={formData.sender}
-                            // onChange={(e) => setFormData({ ...formData, sender: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                            readOnly
-                        /> */}
+                        <select name="role" id="role" onChange={handleChangeRole} className='bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:placeholder-gray-40 dark:focus:ring-blue-500 dark:focus:border-blue-500' required>
+                            {roleList.map((role) => (
+                                <option key={role.id} value={role.id}>
+                                    {role.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex space-x-3 pt-4">
@@ -148,7 +171,7 @@ const ModalUsers: React.FC<{
                             onClick={handleSubmit}
                             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                         >
-                            Resend Message
+                            Edit User
                         </button>
                     </div>
                 </div>

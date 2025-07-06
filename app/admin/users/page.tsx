@@ -1,29 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import LoadingSpinner from '@/component/LoadingSpinner';
 import { fetchApi } from '@/helpers/fetchApi';
 import Swal from 'sweetalert2';
 import UsersTable from '@/component/admin/UsersTable';
 import ModalUsers from '@/component/admin/ModalUsers';
-
-
-interface MessageData {
-    content: string;
-    createdAt: string;
-    deviceId: string;
-    id: string;
-    notes: string;
-    recipient: string;
-    sender: string;
-    status: string;
-    updatedAt: string;
-    userId: number;
-}
-
-interface Role {
-    id: string,
-    name: string
-}
 
 interface UserResponse {
     name: string,
@@ -32,11 +13,11 @@ interface UserResponse {
     id: number,
     phoneNumber: string,
     status: string,
-    role: Role,
     roleId: string
 }
 
 interface UserUpdate {
+    id: number,
     name: string,
     email: string,
     phoneNumber: string,
@@ -48,18 +29,6 @@ const AdminUsers: React.FC = () => {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [messages, setMessages] = useState<MessageData>({
-        content: '',
-        createdAt: '',
-        deviceId: '',
-        id: '',
-        notes: '',
-        recipient: '',
-        sender: '',
-        status: '',
-        updatedAt: '',
-        userId: 0
-    });
     const [user, setUsers] = useState<UserResponse>({
         name: '',
         email: '',
@@ -67,45 +36,41 @@ const AdminUsers: React.FC = () => {
         id: 0,
         phoneNumber: '',
         status: '',
-        role: {
-            id: '',
-            name: ''
-        },
         roleId: ''
     });
 
     const handleUsersEdit = (user: UserResponse) => {
         setUsers(user);
         setModalOpen(true);
-        console.log(user);
     };
 
     const handleUpdateUsers = async (user: UserUpdate) => {
-        console.log(user);
         setLoading(true);
         // HANDLE RESEND MESSAGE
         try {
-            // const res = await fetchApi('/api/admin/whatsapp/resend-message', {
-            //     method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
-            //         phoneNumber: message.recipient,
-            //         deviceId: message.deviceId,
-            //         message: message.content
-            //     }
-            // });
+            const res = await fetchApi('/api/admin/users/edit-users', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, data: {
+                    id: user.id,
+                    status: user.status,
+                    role: user.roleId,
+                    name: user.name,
+                    email: user.email
+                }
+            });
 
-            // if (res.code == 200) {
-            //     Swal.fire({
-            //         icon: 'success',
-            //         title: 'Success',
-            //         text: res.message
-            //     })
-            // } else {
-            //     Swal.fire({
-            //         icon: 'error',
-            //         title: 'Failed',
-            //         text: res.message
-            //     })
-            // }
+            if (res.code == 200) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: res.message
+                })
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: res.message
+                })
+            }
             setLoading(false);
         } catch (error) {
             setLoading(false);

@@ -27,7 +27,7 @@ interface UserData {
 
 type SidebarProps = {
     user: UserData;
-  };
+};
 
 export default function Sidebar({ user }: SidebarProps) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -75,50 +75,50 @@ export default function Sidebar({ user }: SidebarProps) {
                 overflow-y-auto
             `}
             >
-            {/* Logo */}
-            <div className="flex items-center justify-center h-16 px-6 border-b">
-                <h1 className="text-xl font-bold text-blue-600">Whatsapp Gateway</h1>
-            </div>
-
-            {/* Navigation */}
-            <nav className="mt-6">
-                <div className="px-4 py-2">
-                    <h2 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Main</h2>
+                {/* Logo */}
+                <div className="flex items-center justify-center h-16 px-6 border-b">
+                    <h1 className="text-xl font-bold text-blue-600">Whatsapp Gateway</h1>
                 </div>
-                <div className="px-2 space-y-1">
-                    {navigationItems.map((item) => (
-                        <Link
-                            key={item.name}
-                            href={item.url}
-                            className={`
-                                flex items-center px-4 py-2 text-sm font-medium rounded-md 
-                                ${item.active
-                                    ? 'text-blue-600 bg-blue-50'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                }
-                            `}
-                        >
-                            <item.icon className={`mr-3 h-5 w-5 ${item.active ? 'text-blue-500' : 'text-gray-500'}`} />
-                            <span>{item.name}</span>
-                            {item.active && <ChevronRight className="ml-auto h-4 w-4 text-blue-500" />}
-                        </Link>
-                    ))}
-                </div>
-            </nav>
 
-            {/* User Profile */}
-            <div className="absolute bottom-0 w-full border-t p-4">
-                <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                        <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                            US
+                {/* Navigation */}
+                <nav className="mt-6">
+                    <div className="px-4 py-2">
+                        <h2 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Main</h2>
+                    </div>
+                    <div className="px-2 space-y-1">
+                        {navigationItems.map((item) => (
+                            <Link
+                                key={item.name}
+                                href={item.url}
+                                className={`
+                                    flex items-center px-4 py-2 text-sm font-medium rounded-md 
+                                    ${item.active
+                                        ? 'text-blue-600 bg-blue-50'
+                                        : 'text-gray-700 hover:bg-gray-100'
+                                    }
+                                `}
+                            >
+                                <item.icon className={`mr-3 h-5 w-5 ${item.active ? 'text-blue-500' : 'text-gray-500'}`} />
+                                <span>{item.name}</span>
+                                {item.active && <ChevronRight className="ml-auto h-4 w-4 text-blue-500" />}
+                            </Link>
+                        ))}
+                    </div>
+                </nav>
+
+                {/* User Profile */}
+                <div className="absolute bottom-0 w-full border-t p-4">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                                US
+                            </div>
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                     </div>
-                    <div className="ml-3">
-                        <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
                 </div>
-            </div>
             </div>
         </div>
     )

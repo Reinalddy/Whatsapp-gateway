@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         }
 
         // EDIT USERS CURENTLY ADMIN ONLY CAN EDIT STATUS USERS AND ROLE
-        const {role, status, id} = await req.json();
+        const {role, status, id, name, email} = await req.json();
 
         // CHECK APAKAH ROLE NYA VALID
         const checkRole = await prisma.role.findUnique({
@@ -43,7 +43,9 @@ export async function POST(req: NextRequest) {
             },
             data: {
                 roleId: role,
-                status: status
+                status: status,
+                name: name,
+                email: email
             }
         });
 

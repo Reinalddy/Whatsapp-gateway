@@ -42,18 +42,9 @@ export async function GET(req: NextRequest) {
             },
         });
           
-        // const users = await prisma.user.findMany({
-        //     orderBy: {
-        //         createdAt: "desc"
-        //     },clear
-        // });
-
-        // GET ROLE LIST
-        const roleList = await prisma.role.findMany();
 
         const data = {
             users: users,
-            roleList: roleList
         }
 
         return NextResponse.json({

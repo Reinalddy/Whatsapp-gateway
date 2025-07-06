@@ -29,6 +29,15 @@ export async function POST(request: Request) {
             })
         }
 
+        // CHECK STATUS USERS JIKA INCATIVE MAKA TOLAK REQUESTNYA
+        if(user.status == 'inactive') {
+            return NextResponse.json({
+                code: 400,
+                message: "Your account is inactive",
+                data: null
+            })
+        }
+
         const token = generateToken({
             id: user.id,
             email: user.email,

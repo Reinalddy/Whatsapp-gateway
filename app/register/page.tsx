@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { fetchApi } from '@/helpers/fetchApi';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 type FormField = 'name' | 'email' | 'phoneNumber' | 'password' | 'confirmPassword';
 
@@ -131,6 +132,12 @@ export default function RegisterForm() {
             setIsSuccess(true);
             setIsSuccess(false);
             router.push('/login');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: res.message
+            });
         }
     };
 
@@ -141,7 +148,7 @@ export default function RegisterForm() {
 
                 {isSuccess && (
                     <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-                        Registration successful! Check your email for confirmation.
+                        Registration successful!
                     </div>
                 )}
 

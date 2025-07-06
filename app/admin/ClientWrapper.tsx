@@ -5,6 +5,14 @@ import { useUserStore } from '@/lib/store/userStore';
 import { getUserFromToken } from '@/lib/authentication/getUserFromToken';
 import { useRouter } from 'next/navigation';
 
+interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    token: string
+}
+
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
     const { user, setUser, clearUser } = useUserStore();
     const router = useRouter();
@@ -12,7 +20,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     useEffect(() => {
         const fetchUser = async () => {
             if (!user) {
-                const u = await getUserFromToken();
+                const u = await getUserFromToken() as User;
                 if (u) {
                     setUser(u);
                 } else {

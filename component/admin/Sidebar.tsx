@@ -3,15 +3,29 @@ import {
     Home,
     Users,
     MessageSquare,
+    LogOut
 } from 'lucide-react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+
+interface UserData {
+    id: string,
+    email: string,
+    role: string
+
+}
+
+// type SidebarProps = {
+//     user: UserData;
+// };
+
+const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void, user: UserData }> = ({ isOpen, onClose, user }) => {
     const pathName = usePathname();
     const menuItems = [
         { icon: <Home className="w-5 h-5" />, label: 'Dashboard', active: pathName == '/admin/dashboard' ? true : false, url: '/admin/dashboard' },
         { icon: <Users className="w-5 h-5" />, label: 'Users', active: pathName == '/admin/users' ? true : false, url: '/admin/users' },
         { icon: <MessageSquare className="w-5 h-5" />, label: 'Messages', active: pathName == '/admin/messages' ? true : false, url: '/admin/messages' },
+        { icon: <LogOut className="w-5 h-5" />, label: 'Logout', active: false, url: '/api/logout' },
         // { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', active: false },
         // { icon: <Settings className="w-5 h-5" />, label: 'Settings', active: false },
     ];
@@ -60,6 +74,19 @@ const Sidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, o
                         </Link>
                     ))}
                 </nav>
+                {/* User Profile */}
+                <div className="absolute bottom-0 w-full border-t p-4">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                                US
+                            </div>
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-xs text-gray-500">{user.email}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     );

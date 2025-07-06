@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { fetchApi } from '@/helpers/fetchApi';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 type FormField = 'name' | 'email' | 'phoneNumber' | 'password' | 'confirmPassword';
 
@@ -111,6 +112,12 @@ export default function RegisterForm() {
         if(res.code == 200) {
             setIsSuccess(true);
             router.push('/user/dashboard');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: res.message
+            });
         }
     }
 

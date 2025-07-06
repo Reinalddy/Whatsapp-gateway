@@ -48,7 +48,6 @@ const UsersTable: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
             })
 
             setUsers(userData.data.users || []);
-            // console.log(userData);
         } catch (error) {
             console.error('Failed to fetch messages:', error);
         }
@@ -59,7 +58,6 @@ const UsersTable: React.FC<TableProps> = ({ onEdit, modalStatus }) => {
     }, [modalStatus]);
 
     const filteredUsers = useMemo(() => {
-        console.log(users);
         return users.filter(user =>
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.name.toLowerCase().includes(searchTerm.toLowerCase())
