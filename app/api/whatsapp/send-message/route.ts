@@ -18,7 +18,11 @@ export async function POST(req: NextRequest) {
     const response = await apiMiddleware(req);
     const checkAuth = await response.json();
     if (checkAuth.code != 200) {
-        return checkAuth;
+        return NextResponse.json({
+            'code': 500,
+            'message': "Who are you?",
+            'data' : null
+        });
     }
     
     const { deviceId, phoneNumber, message } = await req.json();
