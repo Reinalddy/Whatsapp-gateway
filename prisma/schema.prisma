@@ -15,26 +15,26 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String   @unique
-  phoneNumber  String @unique
-  status       String @default("active") // active, inactive
-  roleId       String
-  role         Role     @relation(fields: [roleId], references: [id])
-  limit        Int?
-  password     String
-  createdAt    DateTime @default(now())
-  whatsappDevices WhatsAppDevice[] // 1 user bisa punya banyak device
-  WhatsAppMessage WhatsAppMessage[] // 1 user bisa punya banyak message
+  id                    Int                     @id @default(autoincrement())
+  name                  String
+  email                 String                  @unique
+  phoneNumber           String                  @unique
+  status                String                  @default("active") // active, inactive
+  roleId                String
+  role                  Role                    @relation(fields: [roleId], references: [id])
+  limit                 Int?
+  password              String
+  createdAt             DateTime                @default(now())
+  whatsappDevices       WhatsAppDevice[] // 1 user bisa punya banyak device
+  WhatsAppMessage       WhatsAppMessage[] // 1 user bisa punya banyak message
   WhatsAppMessageWithAi WhatsAppMessageWithAi[] // 1 user bisa punya banyak message
 
   @@map("users") // 🔁 Nama tabel di database
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  name        String       @unique
+  id          String           @id @default(uuid())
+  name        String           @unique
   permissions RolePermission[]
   users       User[]
 
@@ -42,21 +42,20 @@ model Role {
 }
 
 model Permission {
-  id          String       @id @default(uuid())
-  name        String       @unique
+  id          String           @id @default(uuid())
+  name        String           @unique
   description String?
-  role       RolePermission[]
+  role        RolePermission[]
 
   @@map("permissions") // 🔁 Nama tabel di database
 }
 
-
 model RolePermission {
-  id           String      @id @default(uuid())
+  id           String     @id @default(uuid())
   roleId       String
   permissionId String
-  role         Role        @relation(fields: [roleId], references: [id])
-  permission   Permission  @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
 
   @@unique([roleId, permissionId])
   @@map("role_permissions")
@@ -77,32 +76,33 @@ model WhatsAppDevice {
 }
 
 model WhatsAppMessage {
-  id          String   @id @default(cuid())
-  userId      Int
-  deviceId    String
-  content     String
-  sender      String
-  recipient   String
-  status      String   @default("pending")
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  userId    Int
+  deviceId  String
+  content   String
+  sender    String
+  recipient String
+  status    String   @default("pending")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 
   @@map("whatsapp_message")
 }
+
 model WhatsAppMessageWithAi {
-  id          String   @id @default(cuid())
-  userId      Int
-  deviceId    String
-  content     String @db.LongText
-  sender      String
-  recipient   String
-  status      String   @default("pending")
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  userId    Int
+  deviceId  String
+  content   String   @db.LongText
+  sender    String
+  recipient String
+  status    String   @default("pending")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 
   @@map("whatsapp_message_with_ai")
 }
