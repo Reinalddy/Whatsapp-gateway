@@ -57,7 +57,7 @@ export default function SendBirthdayMessagesWithAiPage() {
                     </button>
                 </div>
                 {/* Search Form */}
-                <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+                {/* <form onSubmit={handleSearch} className="mb-4 flex gap-2">
                     <input
                         type="text"
                         placeholder="Search messages..."
@@ -82,7 +82,7 @@ export default function SendBirthdayMessagesWithAiPage() {
                     >
                         Search
                     </button>
-                </form>
+                </form> */}
 
                 {/* Table */}
                 <div className="overflow-x-auto">

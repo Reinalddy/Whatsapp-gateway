@@ -1,217 +1,280 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 export const runtime = 'nodejs';
-import { makeWASocket, useMultiFileAuthState } from "baileys";
-import * as fs from "fs";
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/helpers/prismaCall";
-import { apiMiddleware } from "@/lib/middleware/apiMiddleware";
 
-/**
- * Kirim pesan WhatsApp ke nomor tujuan menggunakan Baileys
- * @param deviceId ID device yang sudah login
- * @param phoneNumber Nomor tujuan (dalam format internasional, contoh: 6281234567890)
- * @param message Isi pesan yang ingin dikirim
-    */
+import {
+    makeWASocket,
+    useMultiFileAuthState,
+    fetchLatestBaileysVersion,
+    DisconnectReason,
+    type WASocket,
+    type ConnectionState
+} from 'baileys';
+import * as fs from 'fs';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/helpers/prismaCall';
+import { apiMiddleware } from '@/lib/middleware/apiMiddleware';
+import type { Boom } from '@hapi/boom';
+
+type SendStatus = 'pending' | 'success' | 'failed';
 
 export async function POST(req: NextRequest) {
-
-    const response = await apiMiddleware(req);
-    const checkAuth = await response.json();
-    if (checkAuth.code != 200) {
-        return NextResponse.json({
-            'code': 500,
-            'message': "Who are you?",
-            'data' : null
-        });
-    }
-    
-    const { deviceId, phoneNumber, message } = await req.json();
-
-    // Validasi format nomor HP (hanya angka dan panjang wajar)
-    const phoneRegex = /^[0-9]{10,15}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-        return NextResponse.json({
-            code: 400,
-            message: "Invalid phone number format. Must be 10 to 15 digits and numeric only.",
-        }, { status: 400 });
-    }
-
     try {
-        // CARI DEVICE DI DATABASE
+        // ===== Auth =====
+        const response = await apiMiddleware(req);
+        const checkAuth = await response.json();
+        if (checkAuth.code !== 200) {
+            return NextResponse.json(
+                { code: 401, message: 'Who are you?', data: null },
+                { status: 401 }
+            );
+        }
+
+        // ===== Parse & validate body =====
+        const { deviceId, phoneNumber, message } = await req.json();
+
+        if (!deviceId || !phoneNumber || !message) {
+            return NextResponse.json(
+                { code: 400, message: 'Missing required fields' },
+                { status: 400 }
+            );
+        }
+
+        const phoneRegex = /^[0-9]{10,15}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            return NextResponse.json(
+                {
+                    code: 400,
+                    message: 'Invalid phone number format. Must be 10 to 15 digits and numeric only.'
+                },
+                { status: 400 }
+            );
+        }
+
+        // ===== Check device =====
         const device = await prisma.whatsAppDevice.findUnique({
-            where: {
-                id: deviceId,
-            },
+            where: { id: deviceId },
             select: {
                 id: true,
                 name: true,
                 phoneNumber: true,
                 sessionData: true,
-                isActive: true,
-            },
+                isActive: true
+            }
         });
 
         if (!device) {
-            return NextResponse.json({
-                code: 404,
-                message: "Device not found",
-            }, { status: 404 });
+            return NextResponse.json(
+                { code: 404, message: 'Device not found' },
+                { status: 404 }
+            );
         }
 
         if (!device.isActive) {
-            return NextResponse.json({
-                code: 400,
-                message: "Device is not active. Please scan the QR code first.",
-            }, { status: 400 });
+            return NextResponse.json(
+                {
+                    code: 400,
+                    message: 'Device is not active. Please scan the QR code first.'
+                },
+                { status: 400 }
+            );
         }
-        
+
+        // ===== Ensure session exists =====
         const authDir = `auth/${deviceId}`;
-
-        // Pastikan direktori autentikasi masih ada
         if (!fs.existsSync(authDir)) {
-            throw new Error("Session not found. Please login again.");
+            return NextResponse.json(
+                { code: 400, message: 'Session not found. Please login again.' },
+                { status: 400 }
+            );
         }
 
-        // Ambil state dan fungsi penyimpanan session
-        const { state, saveCreds } = await useMultiFileAuthState(authDir);
-        const sock = makeWASocket({ auth: state });
-        // Simpan session jika ada perubahan
-        sock.ev.on("creds.update", saveCreds);
-
-        // CREATE DATABASE MESSAGE LOG
-        await prisma.whatsAppMessage.create({
-            data: {
+        // ===== Create initial log =====
+        await createOrUpdateLog(
+            'pending',
+            {
                 deviceId: device.id,
-                content: message,
                 sender: device.phoneNumber,
                 recipient: phoneNumber,
-                status: "pending", // Status awal adalah pending
-                userId: checkAuth.data.id,
+                content: message,
+                userId: checkAuth.data.id
             },
-        });
+            'queued'
+        );
 
-        // Tunggu koneksi terbuka dulu
-        let isConnected = false;
-        // Gunakan Promise untuk menunggu koneksi
-        await new Promise<void>((resolve, reject) => {
-            const timeout = setTimeout(() => {
-                if (!isConnected) {
-                    // UPDATE STATUS MESSAGE LOG KE TIMEOUT
-                    prisma.whatsAppMessage.updateMany({
-                        where: {
-                            deviceId: device.id,
-                            recipient: phoneNumber,
-                        },
-                        data: {
-                            status: "failed", // Update status ke timeout
-                            notes: "Connection timeout",
-                        },
-                    });
+        // ===== Init WA & wait connection =====
+        const { state, saveCreds } = await useMultiFileAuthState(authDir);
+        const { version } = await fetchLatestBaileysVersion();
+        const sock = makeWASocket({ version, auth: state });
+        sock.ev.on('creds.update', saveCreds);
 
-                    reject(new Error("Connection timeout"))
-                }
-            }, 10000); // timeout 10 detik
-
-            sock.ev.on("connection.update", (update) => {
-                if (update.connection === "open") {
-                    isConnected = true;
-                    clearTimeout(timeout);
-                    resolve();
-                }
-
-                if (update.connection === "close") {
-                    clearTimeout(timeout);
-                    // UPDATE STATUS MESSAGE LOG KE CONNECTION CLOSED
-                    prisma.whatsAppMessage.updateMany({
-                        where: {
-                            deviceId: device.id,
-                            recipient: phoneNumber,
-                        },
-                        data: {
-                            status: "failed", // Update status ke timeout
-                            notes: "Connection closed",
-                        },
-                    });
-                    reject(new Error("Connection closed"));
-                }
-            });
-        })
-        
-        // Format nomor tujuan ke format JID
-        const jid = phoneNumber.includes("@s.whatsapp.net") ? phoneNumber : `${phoneNumber}@s.whatsapp.net`;
-        
-        if (sock?.user) {
-            // Kirim pesan teks
-            try {
-                await sock.sendMessage(jid, { text: message });
-            } catch (error) {
-               await prisma.whatsAppMessage.updateMany({
-                    where: {
-                        deviceId: device.id,
-                        recipient: phoneNumber,
-                    },
-                    data: {
-                        status: "failed", // Update status ke timeout
-                        notes: "Failed to send message",
-                    },
-                });
-                return NextResponse.json({
-                    code: 500,
-                    message: "Failed to send message",
-                    error: error
-                }, { status: 500 });
-            }
-
-            await prisma.whatsAppMessage.updateMany({
-                where: {
+        try {
+            await waitForConnectionOpen(sock, 10_000);
+        } catch (err) {
+            await createOrUpdateLog(
+                'failed',
+                {
                     deviceId: device.id,
-                    recipient: phoneNumber,
+                    recipient: phoneNumber
                 },
-                data: {
-                    status: "success", // Update status ke timeout
-                    notes: "Message sent successfully",
+                `Connection not open: ${String(err)}`
+            );
+
+            return NextResponse.json(
+                { code: 500, message: 'Connection not open' },
+                { status: 500 }
+            );
+        }
+
+        if (!sock.user) {
+            await createOrUpdateLog(
+                'failed',
+                {
+                    deviceId: device.id,
+                    recipient: phoneNumber
                 },
-            });
+                'WhatsApp device not connected'
+            );
+
+            return NextResponse.json(
+                {
+                    code: 400,
+                    message: 'WhatsApp device not connected',
+                    data: { deviceId: device.id, phoneNumber: toJid(phoneNumber), message }
+                },
+                { status: 400 }
+            );
+        }
+
+        // ===== Send message =====
+        try {
+            await sock.sendMessage(toJid(phoneNumber), { text: message });
+
+            await createOrUpdateLog(
+                'success',
+                {
+                    deviceId: device.id,
+                    recipient: phoneNumber
+                },
+                'Message sent successfully'
+            );
 
             return NextResponse.json({
                 code: 200,
-                message: "Message sent successfully",
+                message: 'Message sent successfully',
                 data: {
                     deviceId: device.id,
-                    phoneNumber: jid,
-                    message: message,
+                    phoneNumber: toJid(phoneNumber),
+                    message
                 }
             });
-        } else {
-            console.error("❌ WhatsApp device not connected.");
-            await prisma.whatsAppMessage.updateMany({
-                where: {
+        } catch (err) {
+            await createOrUpdateLog(
+                'failed',
+                {
                     deviceId: device.id,
-                    recipient: phoneNumber,
+                    recipient: phoneNumber
                 },
-                data: {
-                    status: "failed", // Update status ke timeout
-                    notes: "WhatsApp device not connected",
+                `Failed to send message: ${String(err)}`
+            );
+
+            return NextResponse.json(
+                {
+                    code: 500,
+                    message: 'Failed to send message',
+                    error: String(err)
                 },
-            });
-            return NextResponse.json({
-                code: 400,
-                message: "WhatsApp device not connected",
-                data: {
-                    deviceId: device.id,
-                    phoneNumber: jid,
-                    message: message,
-                }
-            });
+                { status: 500 }
+            );
         }
-        
     } catch (error) {
-        console.error("Error sending message:", error);
-        return NextResponse.json({
-            code: 500,
-            message: "Error sending message",
-            error
-        });
-        
+        console.error('Error sending message:', error);
+        return NextResponse.json(
+            {
+                code: 500,
+                message: 'Error sending message',
+                error: String(error)
+            },
+            { status: 500 }
+        );
     }
+}
+
+/* --------------------------------- Helpers -------------------------------- */
+
+async function waitForConnectionOpen(sock: WASocket, timeoutMs: number) {
+    return new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            sock.ev.off('connection.update', onConnectionUpdate);
+            reject(new Error('Connection timeout'));
+        }, timeoutMs);
+
+        const onConnectionUpdate = (update: Partial<ConnectionState>) => {
+            const { connection, lastDisconnect } = update;
+
+            if (connection === 'open') {
+                clearTimeout(timeout);
+                sock.ev.off('connection.update', onConnectionUpdate);
+                resolve();
+            }
+
+            if (connection === 'close') {
+                clearTimeout(timeout);
+                sock.ev.off('connection.update', onConnectionUpdate);
+
+                const boomError = lastDisconnect?.error as Boom | undefined;
+                const statusCode = boomError?.output?.statusCode;
+
+                if (statusCode === DisconnectReason.loggedOut) {
+                    reject(new Error('Logged out, need to re-scan QR'));
+                } else {
+                    reject(new Error('Connection closed'));
+                }
+            }
+        };
+
+        sock.ev.on('connection.update', onConnectionUpdate);
+    });
+}
+
+async function createOrUpdateLog(
+    status: SendStatus,
+    whereOrData: {
+        deviceId: string;
+        recipient: string;
+        sender?: string;
+        content?: string;
+        userId?: string;
+    },
+    notes: string
+) {
+    const { deviceId, recipient } = whereOrData;
+
+    if (status === 'pending') {
+        await prisma.whatsAppMessage.create({
+            data: {
+                deviceId,
+                recipient,
+                sender: whereOrData.sender ?? '',
+                content: whereOrData.content ?? '',
+                status,
+                notes,
+                userId: whereOrData.userId ?? undefined
+            }
+        });
+        return;
+    }
+
+    await prisma.whatsAppMessage.updateMany({
+        where: { deviceId, recipient, status: 'pending' },
+        data: {
+            status,
+            notes
+        }
+    });
+}
+
+function toJid(phoneNumber: string) {
+    return phoneNumber.includes('@s.whatsapp.net')
+        ? phoneNumber
+        : `${phoneNumber}@s.whatsapp.net`;
 }

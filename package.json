@@ -22,6 +22,7 @@
     "jimp": "^0.16.13",
     "jose": "^6.0.11",
     "jsonwebtoken": "^9.0.2",
+    "keyv": "^5.3.3",
     "link-preview-js": "^3.0.15",
     "lucide-react": "^0.510.0",
     "next": "15.3.2",
