@@ -15,15 +15,20 @@ export async function GET(req:NextRequest) {
         const search = searchParams.get('search') || '';
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '5');
+        const status = searchParams.get('status') || '';
         const skip = (page - 1) * limit;
 
         const where = {
             userId: checkAuth.data.id,
+            // STATUS SEARCH ONLY APPLY IF STATUS IS NOT EMPTY
+            ...(status && { status: status }),
+            // status: status,
             ...(search && {
                 OR: [
-                    { content: { contains: search, mode: 'insensitive' } },
-                    { sender: { contains: search, mode: 'insensitive' } },
-                    { recipient: { contains: search, mode: 'insensitive' } },
+                    { content: { contains: search } },
+                    { sender: { contains: search } },
+                    { recipient: { contains: search } },
+                    { status: { contains: search } },
                 ],
             }),
         };
@@ -41,14 +46,13 @@ export async function GET(req:NextRequest) {
         return NextResponse.json({
             code: 200,
             message: "Fetch Data success",
-            data: [
-                {
+            data: {
                     "messages": messages,
                     "total": total,
                     "page": page,
                     "totalPages": Math.ceil(total / limit)
                 }
-            ]
+            
         })
     } catch (error) {
         console.log(error);
