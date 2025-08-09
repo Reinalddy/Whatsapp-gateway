@@ -2,6 +2,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install git & openssh supaya bisa ambil dependency dari repo git
+RUN apk add --no-cache git openssh
+
 # Salin file yang dibutuhkan untuk install dependencies
 COPY package*.json ./
 
