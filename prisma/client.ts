@@ -1,5 +1,5 @@
 // prisma/client.ts
-import { PrismaClient } from "@/app/generated/prisma";
+import { PrismaClient } from '@prisma/client'
 
 declare global {
     let prisma: PrismaClient | undefined;
