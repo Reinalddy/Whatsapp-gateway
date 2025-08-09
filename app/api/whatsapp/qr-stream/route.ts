@@ -153,7 +153,7 @@ export async function GET(req: NextRequest) {
             cancel() { }
         });
 
-        return new Response(stream, {
+        return new Response(stream as any, {
             headers: {
                 'Content-Type': 'text/event-stream; charset=utf-8',
                 'Cache-Control': 'no-cache, no-transform',
