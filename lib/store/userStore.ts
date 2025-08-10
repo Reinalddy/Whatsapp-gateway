@@ -5,7 +5,6 @@ type User = {
     name: string;
     email: string;
     role: string;
-    token: string
 };
 
 type UserState = {

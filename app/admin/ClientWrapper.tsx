@@ -10,7 +10,6 @@ interface User {
     name: string;
     email: string;
     role: string;
-    token: string
 }
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {

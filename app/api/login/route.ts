@@ -41,7 +41,8 @@ export async function POST(request: Request) {
         const token = generateToken({
             id: user.id,
             email: user.email,
-            role: user.role.name
+            role: user.role.name,
+            name: user.name
         });        
 
         const passwordMatch = await bcrypt.compare(password, user.password);
