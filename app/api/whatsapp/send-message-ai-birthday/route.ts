@@ -257,7 +257,7 @@ async function createOrUpdateLog(
         recipient: string;
         sender?: string;
         content?: string;
-        userId?: string;
+        userId?: number;
     },
     notes: string
 ) {
@@ -272,7 +272,7 @@ async function createOrUpdateLog(
                 content: whereOrData.content ?? '',
                 status,
                 notes,
-                userId: whereOrData.userId ?? undefined
+                userId: Number(whereOrData.userId)
             }
         });
         return;
