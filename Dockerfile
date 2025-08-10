@@ -17,6 +17,9 @@ COPY . .
 # Pastikan Prisma Client ter-generate sesuai environment container
 RUN npx prisma generate
 
+# RUN MIGRATE
+RUN npx prisma migrate deploy
+
 # Build Next.js
 RUN npm run build
 
