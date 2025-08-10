@@ -18,7 +18,7 @@ COPY . .
 RUN npx prisma generate
 
 # RUN MIGRATE
-RUN npx prisma migrate deploy
+# RUN npx prisma migrate deploy
 
 # Build Next.js
 RUN npm run build
