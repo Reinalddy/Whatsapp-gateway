@@ -10,18 +10,18 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     const router = useRouter();
 
     useEffect(() => {
-        const fetchUser = async () => {
-            if (!user) {
-                const u = await getUserFromToken();
-                if (u) {
-                    setUser(u);
-                } else {
-                    clearUser();
-                    router.push('/login'); // redirect jika tidak ada user
-                }
-            }
-        };
-        fetchUser();
+        // const fetchUser = async () => {
+        //     if (!user) {
+        //         const u = await getUserFromToken();
+        //         if (u) {
+        //             setUser(u);
+        //         } else {
+        //             clearUser();
+        //             router.push('/login'); // redirect jika tidak ada user
+        //         }
+        //     }
+        // };
+        // fetchUser();
     }, []);
 
     if (!user) {
