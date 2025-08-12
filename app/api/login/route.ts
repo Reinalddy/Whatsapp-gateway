@@ -71,11 +71,12 @@ export async function POST(request: Request) {
             name: 'token',
             value: token,
             httpOnly: true,
-            secure: true, // WAJIB untuk HTTPS
-            sameSite: 'none', // kalau request lintas origin
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             path: '/',
             maxAge: 60 * 60 * 24 * 7
         });
+
 
         return response;
         
