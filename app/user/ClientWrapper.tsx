@@ -24,9 +24,9 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
         // fetchUser();
     }, []);
 
-    if (!user) {
-        return <div className="p-4">Loading or unauthorized...</div>;
-    }
+    // if (!user) {
+    //     return <div className="p-4">Loading or unauthorized...</div>;
+    // }
 
     return <>{children}</>;
 }
