@@ -71,8 +71,10 @@ export async function POST(request: Request) {
             name: 'token',
             value: token,
             httpOnly: true,
+            secure: true, // WAJIB untuk HTTPS
+            sameSite: 'none', // kalau request lintas origin
             path: '/',
-            maxAge: 60 * 60 * 24 * 7, // 7 hari
+            maxAge: 60 * 60 * 24 * 7
         });
 
         return response;
