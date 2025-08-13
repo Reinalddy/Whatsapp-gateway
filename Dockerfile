@@ -36,7 +36,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install libvips di production agar sharp tetap bisa jalan
-RUN apk add --no-cache libc6-compat vips-dev
+RUN apk update && apk add --no-cache \
+    git \
+    openssh \
+    libc6-compat \
+    build-base \
+    python3
+
+RUN apk add --no-cache vips-dev
+
 
 # Pastikan folder auth ada & writable
 RUN mkdir -p /app/auth && chmod -R 777 /app/auth
