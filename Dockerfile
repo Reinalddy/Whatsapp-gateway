@@ -43,6 +43,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env ./.env
 
+# Buat folder auth dan beri permission tulis
+RUN mkdir -p /app/auth && chmod -R 777 /app/auth
+
 EXPOSE 3000
 
 CMD ["npm", "start"]

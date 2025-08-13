@@ -26,9 +26,17 @@ export default function WhatsAppScanQrModal({ open, onClose, deviceId, refreshTa
             // Simulasi fetch QR Code
             const startQrStream = () => {
                 const evtSource = new EventSource(`/api/whatsapp/qr-stream?deviceId=${deviceId}`);
+
                 evtSource.onmessage = (e) => {
                     const data = JSON.parse(e.data);
-                    if (data.qr) setQr(data.qr);
+                    console.log("SSE Data:", data);
+
+                    if (data.status === "connecting") {
+                        setQr(""); // reset QR saat awal
+                    }
+                    if (data.qr) {
+                        setQr(data.qr);
+                    }
                     if (data.connected) {
                         setConnected(true);
                         evtSource.close();
@@ -36,6 +44,11 @@ export default function WhatsAppScanQrModal({ open, onClose, deviceId, refreshTa
                             handleModalOnclose();
                         }, 1500);
                     }
+                };
+
+                evtSource.onerror = (err) => {
+                    console.error("SSE error:", err);
+                    evtSource.close();
                 };
             };
 
