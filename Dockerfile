@@ -1,5 +1,7 @@
-FROM node:20-alpine AS builder
-
+# ------------------------
+# Stage build
+# ------------------------
+FROM node:24.1.0 AS builder
 WORKDIR /app
 
 # Install tools untuk build dan library vips (buat sharp)
@@ -26,11 +28,10 @@ RUN npx prisma generate
 # Build Next.js
 RUN npm run build
 
-
 # ------------------------
 # Stage production
 # ------------------------
-FROM node:20-alpine AS runner
+FROM node:24.1.0-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -41,10 +42,8 @@ RUN apk update && apk add --no-cache \
     openssh \
     libc6-compat \
     build-base \
-    python3
-
-RUN apk add --no-cache vips-dev
-
+    python3 \
+    vips-dev
 
 # Pastikan folder auth ada & writable
 RUN mkdir -p /app/auth && chmod -R 777 /app/auth
