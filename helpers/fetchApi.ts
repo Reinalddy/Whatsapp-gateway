@@ -24,6 +24,7 @@ export async function fetchApi(
             },
             data: options.data,
             params: options.params,
+            withCredentials: true
         });
 
         return response.data;

@@ -6,87 +6,106 @@ import { generateToken } from "@/lib/jwt/jwt";
 export async function POST(request: Request) {
     const { email, password } = await request.json();
 
-    if(!email || !password) {
-        return NextResponse.json({
-            code : 400,
-            message: "Email and password are required",
-            data : null
-        });
+    if (!email || !password) {
+        return NextResponse.json(
+            {
+                code: 400,
+                message: "Email and password are required",
+                data: null,
+            },
+            { status: 400 }
+        );
     }
-    
+
     try {
-
         const user = await prisma.user.findUnique({
-            where: {email},
-            include: {role: true}
+            where: { email },
+            include: { role: true },
         });
-        
-        if(!user) {
-            return NextResponse.json({
-                code: 400,
-                message: "Invalid credentials",
-                data: null
-            })
+
+        if (!user) {
+            return NextResponse.json(
+                {
+                    code: 400,
+                    message: "Invalid credentials",
+                    data: null,
+                },
+                { status: 400 }
+            );
         }
 
-        // CHECK STATUS USERS JIKA INCATIVE MAKA TOLAK REQUESTNYA
-        if(user.status == 'inactive') {
-            return NextResponse.json({
-                code: 400,
-                message: "Your account is inactive",
-                data: null
-            })
+        // Cek status akun
+        if (user.status === "inactive") {
+            return NextResponse.json(
+                {
+                    code: 400,
+                    message: "Your account is inactive",
+                    data: null,
+                },
+                { status: 400 }
+            );
         }
 
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return NextResponse.json(
+                {
+                    code: 400,
+                    message: "Invalid credentials",
+                    data: null,
+                },
+                { status: 400 }
+            );
+        }
+
+        // Buat JWT token
         const token = generateToken({
             id: user.id,
             email: user.email,
             role: user.role.name,
-            name: user.name
-        });        
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        
-        if(!passwordMatch) {
-            return NextResponse.json({
-                code: 400,
-                message: "Invalid credentials",
-                data : null
-            });
-        }
-
-        const response = NextResponse.json({
-            code: 200,
-            message: 'Login success',
-            data: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role.name,
-                token: token
-            },
+            name: user.name,
         });
 
+        const response = NextResponse.json(
+            {
+                code: 200,
+                message: "Login success",
+                data: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role.name,
+                },
+            },
+            { status: 200 }
+        );
+
+        // Set cookie HttpOnly
         response.cookies.set({
-            name: 'token',
+            name: "token",
             value: token,
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7
+            secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7, // 7 hari
         });
 
+        // Tambahkan CORS credentials
+        response.headers.set("Access-Control-Allow-Credentials", "true");
+        response.headers.set("Access-Control-Allow-Origin", process.env.NEXT_PUBLIC_BASE_URL || "*");
 
         return response;
-        
     } catch (error) {
-        console.log(error)
-        return NextResponse.json({
-            code: 500,
-            message: "Something Really wrong",
-            data : error
-        });
+        console.error(error);
+        return NextResponse.json(
+            {
+                code: 500,
+                message: "Something went wrong",
+                data: error,
+            },
+            { status: 500 }
+        );
     }
-
 }
