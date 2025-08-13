@@ -26,7 +26,10 @@ RUN npx prisma generate
 # Build Next.js
 RUN npm run build
 
+
+# ------------------------
 # Stage production
+# ------------------------
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -34,6 +37,9 @@ ENV NODE_ENV=production
 
 # Install libvips di production agar sharp tetap bisa jalan
 RUN apk add --no-cache libc6-compat vips-dev
+
+# Pastikan folder auth ada & writable
+RUN mkdir -p /app/auth && chmod -R 777 /app/auth
 
 # Salin node_modules & hasil build
 COPY --from=builder /app/node_modules ./node_modules
@@ -43,8 +49,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env ./.env
 
-# Buat folder auth dan beri permission tulis
-RUN mkdir -p /app/auth && chmod -R 777 /app/auth
+# Jadikan folder auth sebagai volume agar session tetap ada walau container restart
+VOLUME ["/app/auth"]
 
 EXPOSE 3000
 
