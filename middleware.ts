@@ -42,8 +42,8 @@
 //     return NextResponse.next();
 // }
 
-// export const config = {
-//     matcher: [
-//         '/user/:path*', // middleware akan jalan hanya di /dashboard dan subpath-nya
-//     ],
-//   };
+export const config = {
+    matcher: [
+        '/user/:path*', // middleware akan jalan hanya di /dashboard dan subpath-nya
+    ],
+  };
