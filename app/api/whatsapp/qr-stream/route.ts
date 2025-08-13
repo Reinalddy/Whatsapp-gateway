@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         if (!deviceId) return new Response("deviceId is required", { status: 400 });
 
         // Pastikan folder auth global ada
-        const authDir = path.join(process.cwd(), 'auth');
+        const authDir = path.join(process.cwd(), 'auth', deviceId);
         if (!fs.existsSync(authDir)) {
             fs.mkdirSync(authDir, { recursive: true });
         }
@@ -65,7 +65,8 @@ export async function GET(req: NextRequest) {
                 // 🔹 Keep alive ping tiap 25 detik
                 const ping = setInterval(() => send({}, "ping"), 25000);
 
-                const { state, saveCreds } = await useMultiFileAuthState(`auth/${deviceId}`);
+                // const { state, saveCreds } = await useMultiFileAuthState(`auth/${deviceId}`);
+                const { state, saveCreds } = await useMultiFileAuthState(authDir);
                 const { version } = await fetchLatestBaileysVersion();
 
                 let sock = makeWASocket({
