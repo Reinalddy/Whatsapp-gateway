@@ -1,7 +1,7 @@
 # ------------------------
 # Stage build
 # ------------------------
-FROM node:24.1.0 AS builder
+FROM node:24.1.0-alpine AS builder
 WORKDIR /app
 
 # Install tools untuk build dan library vips (buat sharp)
