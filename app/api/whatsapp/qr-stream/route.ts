@@ -25,17 +25,16 @@ export async function GET(req: NextRequest) {
 
         if (!deviceId) return new Response("deviceId is required", { status: 400 });
 
-        // Pastikan folder auth global ada
-        const authDir = path.join(process.cwd(), 'auth', deviceId);
+        // Pastikan path auth konsisten di semua environment
+        // __dirname = folder file ini, lalu naik ke root project → tambah folder auth
+        const authBaseDir = path.resolve(process.cwd(), "auth");
+        const authDir = path.join(authBaseDir, deviceId);
+
         if (!fs.existsSync(authDir)) {
             fs.mkdirSync(authDir, { recursive: true });
         }
 
-        // Pastikan folder auth per device ada
-        const deviceAuthDir = path.join(authDir, deviceId);
-        if (!fs.existsSync(deviceAuthDir)) {
-            fs.mkdirSync(deviceAuthDir, { recursive: true });
-        }
+        console.log("Auth path:", authDir);
 
         const device = await prisma.whatsAppDevice.findUnique({
             where: { id: deviceId },
@@ -83,11 +82,11 @@ export async function GET(req: NextRequest) {
 
                 const connectionListener = async (update: Partial<ConnectionState>) => {
                     const { connection, lastDisconnect, qr } = update;
-
+                    // send({ test: connection, qrCoy : qr});
+                    console.log(connection, lastDisconnect, qr);
                     if (qr) {
                         send({ qr });
                     }
-
                     if (connection === "open") {
                         await prisma.whatsAppDevice.update({
                             where: { id: device.id },
@@ -143,6 +142,7 @@ export async function GET(req: NextRequest) {
                     }
                 };
 
+                
                 sock.ev.on("connection.update", connectionListener);
 
                 req.signal.addEventListener("abort", () => {
